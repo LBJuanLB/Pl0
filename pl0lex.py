@@ -34,31 +34,33 @@ class Lexer(sly.Lexer):
         t.value = int(t.value)
         return t
     
+    
     LITERAL = r'"([^"]*)"'
     MEI    =r'<='
     MAI    =r'>='
     II     =r'=='
     DI     =r'!='
-    WHILE = r'[Ww][Hh][Ii][Ll][Ee]'
+    WHILE = r'[Ww][Hh][Ii][Ll][Ee]\b'
     ASIG   =r':='
-    NOT    =r'[Nn][oO][Tt]'
-    FUN    = r'[Ff][uU][Nn]'
-    READ   = r'[rR][eE][aA][dD]' 
-    WRITE   = r'[wW][rR][iI][Tt][eE]'
-    PRINT  = r'[Pp][Rr][Ii][Nn][Tt]'
-    DO   = r'[Dd][Oo] '
-    IF     = r'[iI][fF]'
-    THEN   = r'[Tt][Hh][Ee][Nn]'
-    ELSE =r'[Ee][Ll][Ss][Ee]'
-    END    = r'[Ee][Nn][Dd]'
-    BREAK  = r'[Bb][Rr][Ee][Aa][Kk]'
-    RETURN = r'[Rr][Ee][Tt][uU][rR][nN]'
-    SKIP= r'[sS][Kk][iI][pP]'
-    BEGIN    = r'[Bb][Ee][Gg][Ii][Nn]'
-    AND    = r'[Aa][Nn][Dd]'
-    OR    = r'[Oo][Rr]'
-    FLOAT_T  = r'[Ff][Ll][Oo][Aa][Tt]'
-    INT_T = r'[iI][Nn][tT]'
+    NOT    =r'[Nn][oO][Tt]\b'
+    FUN    = r'[Ff][uU][Nn]\b'
+    READ   = r'[rR][eE][aA][dD]\b' 
+    WRITE   = r'[wW][rR][iI][Tt][eE]\b'
+    PRINT  = r'[Pp][Rr][Ii][Nn][Tt]\b'
+    DO   = r'[Dd][Oo]\b'
+    IF     = r'[iI][fF]\b'
+    THEN   = r'[Tt][Hh][Ee][Nn]\b'
+    ELSE =r'[Ee][Ll][Ss][Ee]\b'
+    END    = r'[Ee][Nn][Dd]\b'
+    BREAK  = r'[Bb][Rr][Ee][Aa][Kk]\b'
+    RETURN = r'[Rr][Ee][Tt][uU][rR][nN]\b'
+    SKIP= r'[sS][Kk][iI][pP]\b'
+    BEGIN    = r'[Bb][Ee][Gg][Ii][Nn]\b'
+    AND    = r'[Aa][Nn][Dd]\b'
+    OR    = r'[Oo][Rr]\b'
+    FLOAT_T  = r'[Ff][Ll][Oo][Aa][Tt]\b'
+    INT_T = r'[iI][Nn][tT]\b'
+    
     NAME = r'[a-zA-Z]+[0-9]*[a-zA-Z]*'
 def error(self, t):
         print(f"Caracter ilegal '{t.value[0]}'")
@@ -79,3 +81,6 @@ def main(argv):
 if __name__ == '__main__':
     from sys import argv
     main(argv)
+
+set
+#probando
