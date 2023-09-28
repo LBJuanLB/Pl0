@@ -1,3 +1,3 @@
 # Pl0_Copilador
-juan Espinoza
+Juan Jose Espinosa Mendez
 Carlos andres angola berrio
