@@ -19,6 +19,9 @@ class Lexer(sly.Lexer):
 
         #Literales
         INT, FLOAT, NAME, LITERAL,
+
+        #Comentarios
+        COMMENT,
     }
     literals = '+-*/()[],;:<>"'
 
@@ -34,7 +37,7 @@ class Lexer(sly.Lexer):
         t.value = int(t.value)
         return t
     
-    
+    COMMENT = r'(/\*[^\*]*\*/)'
     LITERAL = r'"([^"]*)"'
     MEI    =r'<='
     MAI    =r'>='
