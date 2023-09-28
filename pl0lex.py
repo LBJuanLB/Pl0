@@ -19,25 +19,22 @@ class Lexer(sly.Lexer):
 
         #Literales
         INT, FLOAT, NAME, LITERAL,
-
-        #Comentarios
-        COMMENT,
     }
-    literals = '+-*/()[],;:<>"'
 
+    literals = '+-*/()[],.;:<>"'
+    ignore_commands = r'(/\*.*?\*/)'
     ignore = ' \t\r\n'
 
-    @_(r'-?([0]|[1-9][0-9]*)\,[0-9]+((e|E)(\+|-)[0-9]+)?')
+    @_(r'(\+|-)?([0]|[1-9][0-9]*)(\.[0-9]+((e|E)(\+|-)?[0-9]+)?|(e|E)(\+|-)?[0-9]+)')
     def FLOAT(self,t):
         t.value = float(t.value)
         return t
 
-    @_(r'(-?[1-9][0-9]*)|[0]')
+    @_(r'((\+|-)?[1-9][0-9]*)|[0]')
     def INT(self,t):
         t.value = int(t.value)
         return t
     
-    COMMENT = r'(/\*[^\*]*\*/)'
     LITERAL = r'"([^"]*)"'
     MEI    =r'<='
     MAI    =r'>='
@@ -84,6 +81,3 @@ def main(argv):
 if __name__ == '__main__':
     from sys import argv
     main(argv)
-
-set
-#probando
