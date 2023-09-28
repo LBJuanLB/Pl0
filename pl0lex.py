@@ -22,8 +22,23 @@ class Lexer(sly.Lexer):
     }
 
     literals = '+-*/()[],.;:<>"'
-    ignore_commands = r'(/\*.*?\*/)'
-    ignore = ' \t\r\n'
+    ignore = ' \t'
+
+    @_(r'\n+')
+    def ignore_newline(self, t):
+        self.lineno += t.value.count('\n')
+
+    @_(r'(/\*(.|\n)*?\*/)')
+    def ignore_comment(self,t):
+        self.lineno += t.value.count('\n')
+    
+    @_(r'/\*(.|\n)+')
+    def ignore_untermcomment(self,t):
+        print(f"Line {self.lineno}. Unterminated comment.")
+    
+    @_(r'[0]\d+.*')
+    def numbers_error(self,t):
+        print(f"Line {self.lineno}. Numero mal escrito {t.value}")
 
     @_(r'(\+|-)?([0]|[1-9][0-9]*)(\.[0-9]+((e|E)(\+|-)?[0-9]+)?|(e|E)(\+|-)?[0-9]+)')
     def FLOAT(self,t):
@@ -62,9 +77,10 @@ class Lexer(sly.Lexer):
     INT_T = r'[iI][Nn][tT]\b'
     
     NAME = r'[a-zA-Z]+[0-9]*[a-zA-Z]*'
-def error(self, t):
-        print(f"Caracter ilegal '{t.value[0]}'")
-        self.index += 1
+
+    def error(self, t):
+            print(f"Caracter ilegal '{t.value[0]}'")
+            self.index += 1
 
 def main(argv):
     if len(argv) != 2:
