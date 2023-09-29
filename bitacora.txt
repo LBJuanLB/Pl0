@@ -1,6 +1,6 @@
 
-Carlos Andres angola berrio 1118201113
-Juan Jose Espinosa Mendez
+Carlos Andres angola berrio - 1118201113
+Juan Jose Espinosa Mendez - 1054538340
 Se esta construyendo  la gramatica para el compilador PL0 construido en BNF 
 
 
@@ -30,4 +30,21 @@ La gramática también incluye varios componentes no terminales que se refieren 
 
     expr: Define expresiones matemáticas y lógicas que involucran números, variables, operadores y llamadas a funciones.
 -------------------------------------------------------------------
-se modifico el analizador lexico por fallas en los comenterios, dectecion de errores 
+CLASE 21/09/23
+Se comenzó a realizar el analizador lexico basandonos en el analizador lexico para el lenguaje BASIC Darmounth 64 - baslex .py
+Ya luego mirando la gramatica que ya habiamos realizado empezamos a identificar los tokens, y los especificamos.  
+
+CLASE 26/09/23
+Verificamos que no nos faltara nigun token
+Tomamos un ejemplo de un programa que estaba en el archivo de especificaciones, lo llamamos programa.txt 
+Con el programa comenzamos a verificar que se estuvieran tomando adecuadamente los tokens
+Nos dimos cuenta que no estaba tomando bien los tokens, ya que "done" que era un identificador lo estaba tomando primero
+como token DO y el "ne" como name, tendria que tomar "done" completo como name, para solucionar esto agregamso \b para establecer
+el limite del token, con esto solucionamos ese problema
+
+CLASE 28/09/24
+Se modifico el analizador lexico para agregarle que ignore comentarios comenterios,y comience a detectar errores
+de tipo comentario/string no terminado, tambien cuando escribe mal un numero. 
+Tambien se agrego el error de que el identificador no puede empezar con un numero y se modifico la expresion regular
+porque el identificador puede tener _
+Se modifico la forma en que se muestra los tokens, ahora lo hace mediante una tabla  
