@@ -109,9 +109,9 @@ def main(argv):
         if isinstance(tok.value, str):
             value = tok.value
         else:
-            value = ""
+            value = tok.value
         table.add_row(tok.type,
-                      value,
+                      str(value),
                       str(tok.lineno),
                       str(tok.index),
                       str(tok.end))
