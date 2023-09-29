@@ -11,7 +11,7 @@ from rich.table import Table
 table = Table(title='Análisis Léxico')
 table.add_column('type')
 table.add_column('value')
-table.add_column('lineno', justify='right')
+table.add_column('linea', justify='right')
 table.add_column('index', justify='right')
 table.add_column('end', justify='right')
 
@@ -110,15 +110,15 @@ def main(argv):
     
     lex = Lexer()
     txt = open(argv[1]).read()
-
+    ##
     for tok in lex.tokenize(txt):
         #value=tok.value if isinstance(tok.value , str(tok.value))
         if isinstance(tok.value, str):
             value = tok.value
         else:
-            value = ""
+            value = tok.value
         table.add_row(tok.type,
-                      value,
+                      str(value),
                       str(tok.lineno),
                       str(tok.index),
                       str(tok.end))
