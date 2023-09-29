@@ -6,11 +6,14 @@ Analizador Lexico para el lenguaje PL0
 import sly
 from rich.console import  Console
 from rich.table import Table
-table=Table(title='Análisis Léxico')
+
+# Crea la tabla
+table = Table(title='Análisis Léxico')
 table.add_column('type')
 table.add_column('value')
-table.add_column('lineno',justify='rigth')
-table.add_column('type')
+table.add_column('lineno', justify='right')
+table.add_column('index', justify='right')
+table.add_column('end', justify='right')
 
 class Lexer(sly.Lexer):
     tokens = {
@@ -29,8 +32,23 @@ class Lexer(sly.Lexer):
     }
 
     literals = '+-*/()[],.;:<>"'
-    ignore_commands = r'(/\*.*?\*/)'
-    ignore = ' \t\r\n'
+    ignore = ' \t'
+
+    @_(r'\n+')
+    def ignore_newline(self, t):
+        self.lineno += t.value.count('\n')
+
+    @_(r'(/\*(.|\n)*?\*/)')
+    def ignore_comment(self,t):
+        self.lineno += t.value.count('\n')
+    
+    @_(r'/\*(.|\n)+')
+    def ignore_untermcomment(self,t):
+        print(f"Line {self.lineno}. Unterminated comment.")
+
+    @_(r'[0]\d+.*')
+    def numbers_error(self,t):
+        print(f"Line {self.lineno}. Numero mal escrito {t.value}")
 
     @_(r'(\+|-)?([0]|[1-9][0-9]*)(\.[0-9]+((e|E)(\+|-)?[0-9]+)?|(e|E)(\+|-)?[0-9]+)')
     def FLOAT(self,t):
@@ -69,9 +87,14 @@ class Lexer(sly.Lexer):
     INT_T = r'[iI][Nn][tT]\b'
     
     NAME = r'[a-zA-Z]+[0-9]*[a-zA-Z]*'
-def error(self, t):
-        print(f"Caracter ilegal '{t.value[0]}'")
-        self.index += 1
+
+    @_(r'".+')
+    def ignore_unterstring(self,t):
+        print(f"Line {self.lineno}. Unterminated string.")
+
+    def error(self, t):
+            print(f"Line {self.lineno}. Caracter ilegal '{t.value[0]}'")
+            self.index += 1
 
 def main(argv):
     if len(argv) != 2:
@@ -82,7 +105,19 @@ def main(argv):
     txt = open(argv[1]).read()
 
     for tok in lex.tokenize(txt):
-        print(tok)
+        #value=tok.value if isinstance(tok.value , str(tok.value))
+        if isinstance(tok.value, str):
+            value = tok.value
+        else:
+            value = ""
+        table.add_row(tok.type,
+                      value,
+                      str(tok.lineno),
+                      str(tok.index),
+                      str(tok.end))
+    console = Console()
+    console.print(table)
+        #print(tok)
 
 
 if __name__ == '__main__':
