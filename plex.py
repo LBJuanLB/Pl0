@@ -5,8 +5,8 @@ Analizador Lexico para el lenguaje PL0
 '''
 import sly
 from rich.console import  Console
-
-table=Tablet(title='Análisis Léxico')
+from rich.table import Table
+table=Table(title='Análisis Léxico')
 table.add_column('type')
 table.add_column('value')
 table.add_column('lineno',justify='rigth')
