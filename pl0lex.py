@@ -35,7 +35,7 @@ class Lexer(sly.Lexer):
     @_(r'/\*(.|\n)+')
     def ignore_untermcomment(self,t):
         print(f"Line {self.lineno}. Unterminated comment.")
-    
+
     @_(r'[0]\d+.*')
     def numbers_error(self,t):
         print(f"Line {self.lineno}. Numero mal escrito {t.value}")
@@ -78,8 +78,12 @@ class Lexer(sly.Lexer):
     
     NAME = r'[a-zA-Z]+[0-9]*[a-zA-Z]*'
 
+    @_(r'".+')
+    def ignore_unterstring(self,t):
+        print(f"Line {self.lineno}. Unterminated string.")
+
     def error(self, t):
-            print(f"Caracter ilegal '{t.value[0]}'")
+            print(f"Line {self.lineno}. Caracter ilegal '{t.value[0]}'")
             self.index += 1
 
 def main(argv):
