@@ -45,10 +45,17 @@ class Lexer(sly.Lexer):
     @_(r'/\*(.|\n)+')
     def ignore_untermcomment(self,t):
         print(f"Line {self.lineno}. Unterminated comment.")
+        self.lineno += t.value.count('\n')
 
     @_(r'[0]\d+.*')
     def numbers_error(self,t):
         print(f"Line {self.lineno}. Numero mal escrito {t.value}")
+        self.lineno += t.value.count('\n')
+
+    @_(r'\d+[a-zA-Z_]+')
+    def identifier_error(self,t):
+        print(f"Line {self.lineno}. Nombre de la funcion o variable mal escrito {t.value}")
+        self.lineno += t.value.count('\n')
 
     @_(r'(\+|-)?([0]|[1-9][0-9]*)(\.[0-9]+((e|E)(\+|-)?[0-9]+)?|(e|E)(\+|-)?[0-9]+)')
     def FLOAT(self,t):
@@ -85,13 +92,13 @@ class Lexer(sly.Lexer):
     OR    = r'[Oo][Rr]\b'
     FLOAT_T  = r'[Ff][Ll][Oo][Aa][Tt]\b'
     INT_T = r'[iI][Nn][tT]\b'
-    
-    NAME = r'[a-zA-Z]+[0-9]*[a-zA-Z]*'
+    NAME = r'[a-zA-Z_]+[0-9-a-zA-Z_]*'
 
     @_(r'".+')
     def ignore_unterstring(self,t):
         print(f"Line {self.lineno}. Unterminated string.")
-
+        self.lineno += t.value.count('\n')
+        
     def error(self, t):
             print(f"Line {self.lineno}. Caracter ilegal '{t.value[0]}'")
             self.index += 1
