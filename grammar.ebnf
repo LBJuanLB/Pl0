@@ -1,3 +1,36 @@
+//TOKENS
+literals = '+-*/()[],.;:<>"'
+FLOAT = r'(\+|-)?([0]|[1-9][0-9]*)(\.[0-9]+((e|E)(\+|-)?[0-9]+)?|(e|E)(\+|-)?[0-9]+)'
+INT = r'((\+|-)?[1-9][0-9]*)|[0]'
+LITERAL = r'"([^"]*)"'
+MEI    =r'<='
+MAI    =r'>='
+II     =r'=='
+DI     =r'!='
+WHILE = r'[Ww][Hh][Ii][Ll][Ee]\b'
+ASIG   =r':='
+NOT    =r'[Nn][oO][Tt]\b'
+FUN    = r'[Ff][uU][Nn]\b'
+READ   = r'[rR][eE][aA][dD]\b' 
+WRITE   = r'[wW][rR][iI][Tt][eE]\b'
+PRINT  = r'[Pp][Rr][Ii][Nn][Tt]\b'
+DO   = r'[Dd][Oo]\b'
+IF     = r'[iI][fF]\b'
+THEN   = r'[Tt][Hh][Ee][Nn]\b'
+ELSE =r'[Ee][Ll][Ss][Ee]\b'
+END    = r'[Ee][Nn][Dd]\b'
+BREAK  = r'[Bb][Rr][Ee][Aa][Kk]\b'
+RETURN = r'[Rr][Ee][Tt][uU][rR][nN]\b'
+SKIP= r'[sS][Kk][iI][pP]\b'
+BEGIN    = r'[Bb][Ee][Gg][Ii][Nn]\b'
+AND    = r'[Aa][Nn][Dd]\b'
+OR    = r'[Oo][Rr]\b'
+FLOAT_T  = r'[Ff][Ll][Oo][Aa][Tt]\b'
+INT_T = r'[iI][Nn][tT]\b'
+NAME = r'[a-zA-Z]+[0-9]*[a-zA-Z]*'
+
+//CFG
+
 program ::= function
 
 function ::= 'FUN' name '(' arglist? ')' locals 'BEGIN' statements 'END'
@@ -46,12 +79,12 @@ location ::= name | name '[' int ']'
 
 num ::= int | float
 
-int ::= '-'?[1-9][0-9]*
+int ::= ((\+|-)?[1-9][0-9]*)|[0]
 
-float ::= '-'? ( '0' | [1-9] [0-9]* ) ',' [0-9]+ ( ('e'|'E') ( '+' | '-' ) [0-9]+ )?
+float ::= (\+|-)?([0]|[1-9][0-9]*)(\.[0-9]+((e|E)(\+|-)?[0-9]+)?|(e|E)(\+|-)?[0-9]+)
 
 array ::= 'INT' '[' int ']' | 'FLOAT' '[' float ']'
 
-name ::= [a-zA-Z]+ [0-9]* [a-zA-Z]*
+name ::= [a-zA-Z_]+[0-9-a-zA-Z_]*
 
 literal ::= "([^"]*)"
