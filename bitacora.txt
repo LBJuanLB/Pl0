@@ -1,0 +1,33 @@
+
+Carlos Andres angola berrio 1118201113
+Juan Jose Espinosa Mendez
+Se esta construyendo  la gramatica para el compilador PL0 construido en BNF 
+
+
+Componentes Terminales
+
+    number: Representa un número en el lenguaje. Puede ser un entero o un número de punto flotante. Los números enteros consisten en una o más cifras, mientras que los números de punto flotante tienen un punto decimal seguido de una o más cifras decimales.
+
+    name: Representa un identificador en el lenguaje. Puede consistir en una o más letras (mayúsculas o minúsculas).
+
+    literal: Representa una secuencia de caracteres que puede ser cualquier cosa (.*). Esto parece ser un valor arbitrario que se imprime tal cual.
+
+    relation: Representa expresiones relacionales que pueden comparar dos expresiones. Incluye operadores como >, <, >=, <=, == y !=.
+
+    exprlist: Aparentemente, se define como una lista de expresiones separadas por comas, pero la definición está en blanco.
+
+    relaciones: Define expresiones relacionales, como operaciones and, or y not en relaciones.
+
+Componentes No Terminales
+
+La gramática también incluye varios componentes no terminales que se refieren a estructuras y operaciones específicas del lenguaje de programación:
+
+    statement: Representa una instrucción en el lenguaje. Incluye declaraciones de bucles, condicionales, asignaciones, impresiones, lecturas, retornos, llamadas a funciones, sentencias "skip", operaciones de expresiones y el bloque "begin...end".
+
+    asignamt: Define asignaciones de variables o arreglos.
+
+    relation: Define relaciones entre expresiones. Pueden ser operaciones relacionales como mayor que, menor que, igual a, etc.
+
+    expr: Define expresiones matemáticas y lógicas que involucran números, variables, operadores y llamadas a funciones.
+-------------------------------------------------------------------
+se modifico el analizador lexico por fallas en los comenterios, dectecion de errores 
