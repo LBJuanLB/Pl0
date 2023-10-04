@@ -45,32 +45,37 @@ class Parser(sly.Parser):
 
     @_("location ':''=' expr")
     def statement(self, p):
-        ...
+        # p[1] contiene la ubicación (location) a la que se asignará el valor
+        location = p[1]
+        # p[3] contiene la expresión cuyo valor se asignará a la ubicación
+        expression = p[3]
+        return {"assignment": {"location": location, "value": expression}}
     @_("'print''('literal')'")
     def statement(self, p):
-        ...
+        return p[2]
     @_("'write''('expr')'")
     def statement(self, p):
-        ...
+        return {"write": p[2]}
     @_("'read''('location')'")
     def statement(self, p):
-        ...
+        return {"read": p[2]}
     @_("'return' expr")
     def statement(self, p):
-        ...
+        return {"return": p[1]}
         
     @_("name'('exprlist')'")
     def statement(self, p):
         ...
     @_("'skip'")
     def statement(self, p):
-        ...
+        return {"skip": True}
     @_("'break'")
     def statement(self, p):
-        ...
+        return {"break": True}
     @_("'begin' statements 'end'")
     def statement(self, p):
-        ...
+        blok_estatements =p[1]
+        return blok_estatements
         
    
     @_("expr '+' expr")
@@ -117,15 +122,19 @@ class Parser(sly.Parser):
         return result
     @_( "name '(' exprlist ')'")
     def expr(self, p):
-        ...
-      
+        function_call = {
+        "type": "function_call",  # Puedes usar una cadena para identificar el tipo de operación
+        "name": p[0],             # El nombre de la función o método
+        "arguments": p[2]         # La lista de argumentos (resultado de exprlist)
+        }
+        return function_call
     @_( "name")
     def expr(self, p):
        # Variable name
         if isinstance(p[0], str):
             result = p[0]
         return result
-    @_( "name '[' INT ']'")
+    @_( "name '[' int ']'")
     def expr(self, p):
         # Variable con índice: name '[' INT ']'
          if len(p) == 4 and p[1] == '[' and isinstance(p[2], int) and p[3] == ']':
@@ -155,41 +164,46 @@ class Parser(sly.Parser):
 
     @_("expr (',' expr)+")
     def exprlist(self, p):
-        ...
+        expresion=[p[0]]
+        for expr in p[2]:
+            expresion.append(expr)
+        return expresion
     
     @_("relation 'and' relation","relation 'or' relation")
     def  relation(self, p):
-        ...
+        if p[1] == 'and':
+            result = p[0] and p[2]
+        elif p[1] == 'or':
+            result = p[0] or p[2]
+        return result
     @_("'NOT' relation ")
     def  relation(self, p):
-        ...
+        result = not p[1]
+        return result
     @_("'(' relation ')'")
     def  relation(self, p):
-        ...
-    @_("expr '>' expr")
-    def  relation(self, p):
-        ...
-    @_("expr '<' expr")
-    def  relation(self, p):
-        ...
-    @_(" expr '>''=' expr")
-    def  relation(self, p):
-        ...
-    @_("expr '<''=' expr")
-    def  relation(self, p):
-        ...
-    @_("expr '=''=' expr")
-    def  relation(self, p):
-        ...
-    @_("expr '!''=' expr")
-    def  relation(self, p):
-        ...
-      
-    @_("name ':' 'INT' ")
-    def  arg(self, p):
-        ...
-    @_("name ':' 'FLOAT' ")
-    def  arg(self, p):
+        return p[1]
+    @_("expr '>' expr",
+       "expr '<' expr,", 
+       "expr '>=' expr",
+       "expr '<=' expr",
+       "expr '==' expr",
+       "expr '!=' expr)")
+    def relation(self, p):
+        if p[1] == '>':
+            result = p[0] > p[2]
+        elif p[1] == '<':
+            result = p[0] < p[2]
+        elif p[1] == '>=':
+            result = p[0] >= p[2]
+        elif p[1] == '<=':
+            result = p[0] <= p[2]
+        elif p[1] == '==':
+            result = p[0] == p[2]
+        elif p[1] == '!=':
+            result = p[0] != p[2]
+
+        return result
         ...
     @_("name ':'  'INT' '[' int ']'")
     def  arg(self, p):
