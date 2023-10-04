@@ -25,23 +25,59 @@ class Parser(sly.Parser):
     @_('FUN name "(" arguments ")" locals BEGIN statements END')
     def function(self, p):
         
-        print("Definición de función:", p.name)
-        print("Argumentos:", p.arguments)
-        print("Locales:", p.locals)
-        print("Declaraciones:", p.statements)
-        return p
+        function_name = p.name
+        arguments = p.arguments
+        locals = p.locals
+        statements = p.statements
+
+        function_definition = {
+            "type": "function",
+            "name": function_name,
+            "arguments": arguments,
+            "locals": locals,
+            "body": statements  }
+
+        return function_definition
     
    
     @_("statement (';' statement)*")
     def statements(self, p):
-        return [p.statement] + p.statements
+        statements_sequence = [p[0]]  # Inicialmente, agregamos la primera declaración a la lista
+        for statement in p[2]:
+            statements_sequence.append(statement)
+
+        return statements_sequence
     
     @_("'WHILE' relation 'do' statement")
     def statement(self, p):
-        ...
+        condition = p[0]  # La condición a evaluar
+        body = p[3]       # El cuerpo del bucle (declaraciones que se ejecutan mientras la condición sea verdadera)
+
+        while_loop = {
+            "type": "while",
+            "condition": condition,
+            "body": body
+        }
+
+        return while_loop
     @_("'if' relation 'then' statement 'else' statement")
     def statement(self, p):
-        ...
+        condition = p[1]      # La condición a evaluar
+        true_branch = p[3]    # El bloque de código a ejecutar si la condición es verdadera
+        false_branch = p[5]   # El bloque de código a ejecutar si la condición es falsa
+
+        # Realiza acciones correspondientes a la estructura de control 'if-else'
+        # Puedes tomar medidas para construir una estructura que refleje la estructura de control 'if-else',
+        # incluyendo la condición, el bloque de código verdadero y el bloque de código falso.
+
+        if_else = {
+            "type": "if_else",
+            "condition": condition,
+            "true_branch": true_branch,
+            "false_branch": false_branch
+        }
+
+        return if_else
 
     @_("location ':''=' expr")
     def statement(self, p):
@@ -159,9 +195,6 @@ class Parser(sly.Parser):
                 result = float(p[2])
         return result
     
-
-
-
     @_("expr (',' expr)+")
     def exprlist(self, p):
         expresion=[p[0]]
@@ -244,18 +277,20 @@ class Parser(sly.Parser):
     
     @_("'INT' '[' int ']'") 
     def array(self, p):
-        ...
+        valor = p[2]
+        return {"array_declaration": {"type": "INT", "size": valor}}
     @_("'FLOAT' '[' float ']'") 
     def array(self, p):
-        ...
+        valor= p[2] 
+        return {"array_declaration": {"type": "FLOAT", "size": valor}}
         
     @_("[a-zA-Z_]+[0-9-a-zA-Z_]*") 
     def name(self, p):
-        ...
+        return p
         
     @_(".*")
     def  literal(self, p):
-        ...
+        return p
    
 
     
