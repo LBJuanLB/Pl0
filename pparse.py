@@ -82,7 +82,7 @@ class Parser(sly.Parser):
     @_("location ':''=' expr")
     def statement(self, p):
         # p[1] contiene la ubicación (location) a la que se asignará el valor
-        location = p[1]
+        location = p[0]
         # p[3] contiene la expresión cuyo valor se asignará a la ubicación
         expression = p[3]
         return {"assignment": {"location": location, "value": expression}}
