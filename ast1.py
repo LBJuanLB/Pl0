@@ -37,5 +37,4 @@ class Eval(Visitor):
         left=n.lefth.accept(n.lefth)
         rigth=n.rigth.accept(n.rigth)
         return eval(f"{left}{n.op}{rigth}")
-            
-        
+
