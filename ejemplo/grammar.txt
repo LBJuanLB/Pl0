@@ -1,0 +1,67 @@
+program ::= funclist
+
+funclist ::= function { function }
+
+function ::= 'FUN' 'ID' parmlist varlist 'BEGIN' stmtlist 'END'
+
+parmlist ::= '(' [ parmlistitems ] ')'
+
+parmlistitems ::= parm { ',' parm }
+
+parm ::= 'ID' ':' typename
+
+typename ::= ( 'INT' | 'FLOAT' ) [ '[' expr ']' ]
+
+varlist ::= [ decllist optsemi ]
+
+decllist ::= vardecl { ';' vardecl }
+
+vardecl ::= parm | function
+
+stmtlist ::= stmt { ';' stmt }
+
+stmt ::= 'PRINT' '(' 'STRING' ')'
+    | 'WRITE' '(' expr ')'
+    | 'READ' '(' location ')'
+    | 'WHILE' relop DO stmt
+    | 'BREAK'
+    | 'IF' relop 'THEN' stmt [ 'ELSE' stmt ]
+    | 'BEGIN' stmtlist 'END'
+    | location ':=' expr
+    | 'RETURN' expr
+    | 'SKIP'
+    | 'IDENT' '(' exprlist ')'
+
+location ::= 'ID' 
+    | 'ID' '[' expr ']'
+
+exprlist ::= [ exprlistitems ]
+
+exprlistitems ::= expr [ ',' expr ]
+
+expr ::= expr '+' exprB
+    | expr '-' expr
+    | expr '*' expr
+    | expr '/' expr
+    | '-' expr
+    | '+' expr
+    | '(' expr ')'
+    | 'INUMBER'
+    | 'FNUMBER'
+    | 'ID'
+    | 'ID' '[' expr ']'
+    | 'ID' '(' exprlist ')'
+    | 'INT' '(' expr ')'
+    | 'FLOAT' '(' expr ')'
+
+relop ::= expr 'LT' expr
+    | expr 'LE' expr
+    | expr 'GT' expr
+    | expr 'GE' expr
+    | expr 'EQ' expr
+    | expr 'NE' expr
+    | relop 'AND' relop
+    | relop 'OR' relop
+    | 'NOT' relop
+
+
