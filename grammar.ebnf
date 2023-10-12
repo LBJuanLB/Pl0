@@ -31,20 +31,22 @@ NAME = r'[a-zA-Z]+[0-9]*[a-zA-Z]*'
 
 /* CFG */
 
-program ::= function
+program ::= funclist
 
-function ::= 'FUN' name '(' arglist? ')' locals 'BEGIN' statements 'END'
+funclist ::= function {function}
 
-statements ::= statement (';' statement)*
+function ::= 'FUN' NAME '(' [ arglist ] ')' locals 'BEGIN' statements 'END'
+
+statements ::= statement {';' statement}
 
 statement ::= 'WHILE' relation 'DO' statement
-             |'IF' relation 'THEN' statement ('ELSE' statement)?
+             |'IF' relation 'THEN' statement ['ELSE' statement]
              |location ':=' expr
-             |'PRINT' '(' literal ')'
+             |'PRINT' '(' LITERAL ')'
              |'WRITE' '(' expr ')'
              |'READ' '(' location ')'
              |'RETURN' expr
-             | name '(' exprlist ')'
+             | NAME '(' exprlist ')'
              | 'SKIP' 
              | 'BREAK' 
              | 'BEGIN' statements 'END'
@@ -56,35 +58,33 @@ expr ::= expr '+' expr
         |'-' expr
         |'+' expr
         |'(' expr ')'
-        |name '(' exprlist ')'
-        |name
-        |name '[' int ']'
-        |num
+        |NAME '[' expr ']'
+        |NAME '(' exprlist ')'
+        |NAME
+        |NUM
         |('INT' | 'FLOAT') '(' expr ')'
         
-exprlist ::= expr (',' expr)+
+exprlist ::= expr [',' expr]
 
-relation ::= expr ('<'|'<='|'>'|'>='|'=='|'!='|) expr 
+relation ::= expr ('<'|'<='|'>'|'>='|'=='|'!=') expr 
             | relation ('AND'|'OR') relation 
             | 'NOT' relation 
             | '(' relation ')'
 
-arg ::= name ':' ('INT' | 'FLOAT' | 'INT' '[' int ']')
+arg ::= NAME ':' ('INT' | 'FLOAT' ) ['[' expr ']']
 
-arglist ::= arg (',' arg)*
+arglist ::= arg { ',' arg }
 
-locals ::= (arg ';' | function ';')*
+locals ::= (arg | function) ';' {locals}
 
-location ::= name | name '[' int ']'
+location ::= NAME | NAME '[' expr ']'
 
-num ::= int | float
+NUM ::= INT | FLOAT
 
-int ::= ((\+|-)?[1-9][0-9]*)|[0]
+INT ::= ((\+|-)?[1-9][0-9]*)|[0]
 
-float ::= (\+|-)?([0]|[1-9][0-9]*)(\.[0-9]+((e|E)(\+|-)?[0-9]+)?|(e|E)(\+|-)?[0-9]+)
+FLOAT ::= (\+|-)?([0]|[1-9][0-9]*)(\.[0-9]+((e|E)(\+|-)?[0-9]+)?|(e|E)(\+|-)?[0-9]+)
 
-array ::= 'INT' '[' int ']' | 'FLOAT' '[' float ']'
+NAME ::= [a-zA-Z_]+[0-9-a-zA-Z_]*
 
-name ::= [a-zA-Z_]+[0-9-a-zA-Z_]*
-
-literal ::= "([^"]*)"
+LITERAL ::= "([^"]*)"
