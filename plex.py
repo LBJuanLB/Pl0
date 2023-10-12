@@ -62,7 +62,29 @@ class Lexer(sly.Lexer):
         t.value = int(t.value)
         return t
 
-    LITERAL = r'".*[^(\\|\n)]"'
+    @_(r'".*\\e.*"')
+    def error_escape(self,t):
+        print(f"Line {self.lineno}. Caracter de escape ilegal en {t.value}")
+        self.lineno += t.value.count('\n')
+
+    @_(r'".*[^(\\|\n)]"')
+    def LITERAL(self,t):
+        length=len(t.value)
+        i=0
+        sentence=0
+        cadena="\""
+        while (i<length):
+            if t.value[i] == "\"" and t.value[i-1] != "\\" and sentence==0:
+                sentence=1
+            elif t.value[i] == "\"" and t.value[i-1] != "\\" and sentence == 1:
+                sentence=0
+            elif sentence==1:
+                cadena=cadena+t.value[i]
+            i+=1
+        t.value=cadena+"\""
+        return t
+
+
 
     @_(r'".*\n')
     def ignore_unterstring(self,t):
