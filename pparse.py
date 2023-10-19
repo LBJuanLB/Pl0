@@ -12,21 +12,24 @@ class Parser(sly.Parser):
     log = logging.getLogger()
     log.setLevel(logging.ERROR)
     expected_shift_reduce = 1
-    debugfile = 'basic.txt'
+    debugfile = 'pl0.txt'
 
     tokens = Lexer.tokens
 
     # Implementacion Reglas de la Gramatica
 
-    @_('function')
+    @_("funclist")
     def program(self, p):
+        return p.funclist
+
+    @_("function { function }")
+    def funclist(self, p):
         return p.function
 
-    @_('FUN name "(" arguments ")" locals BEGIN statements END')
+    @_("FUN name '(' [ arglist ] ')' locals BEGIN statements END")
     def function(self, p):
-        
         function_name = p.name
-        arguments = p.arguments
+        arguments = p.arglist
         locals = p.locals
         statements = p.statements
 
@@ -35,12 +38,12 @@ class Parser(sly.Parser):
             "name": function_name,
             "arguments": arguments,
             "locals": locals,
-            "body": statements  }
+            "body": statements}
 
         return function_definition
     
    
-    @_("statement (';' statement)*")
+    @_("statement {';' statement}")
     def statements(self, p):
         statements_sequence = [p[0]]  # Inicialmente, agregamos la primera declaración a la lista
         for statement in p[2]:
@@ -48,7 +51,7 @@ class Parser(sly.Parser):
 
         return statements_sequence
     
-    @_("'WHILE' relation 'do' statement")
+    @_("WHILE relation DO statement")
     def statement(self, p):
         condition = p[0]  # La condición a evaluar
         body = p[3]       # El cuerpo del bucle (declaraciones que se ejecutan mientras la condición sea verdadera)
@@ -60,7 +63,7 @@ class Parser(sly.Parser):
         }
 
         return while_loop
-    @_("'if' relation 'then' statement 'else' statement")
+    @_("IF relation THEN statement [ELSE statement]")
     def statement(self, p):
         condition = p[1]      # La condición a evaluar
         true_branch = p[3]    # El bloque de código a ejecutar si la condición es verdadera
@@ -79,109 +82,84 @@ class Parser(sly.Parser):
 
         return if_else
 
-    @_("location ':''=' expr")
+    @_("location ':=' expr")
     def statement(self, p):
         # p[1] contiene la ubicación (location) a la que se asignará el valor
         location = p[0]
         # p[3] contiene la expresión cuyo valor se asignará a la ubicación
         expression = p[3]
         return {"assignment": {"location": location, "value": expression}}
-    @_("'print''('literal')'")
+    
+    @_("PRINT '(' LITERAL ')'")
     def statement(self, p):
         return p[2]
-    @_("'write''('expr')'")
+    
+    @_("WRITE '(' expr ')'")
     def statement(self, p):
         return {"write": p[2]}
-    @_("'read''('location')'")
+    
+    @_("READ '(' location ')'")
     def statement(self, p):
         return {"read": p[2]}
-    @_("'return' expr")
+    
+    @_("RETURN expr")
     def statement(self, p):
         return {"return": p[1]}
         
-    @_("name'('exprlist')'")
+    @_("NAME '(' exprlist ')'")
     def statement(self, p):
         ...
-    @_("'skip'")
+    @_("SKIP")
     def statement(self, p):
         return {"skip": True}
-    @_("'break'")
+    
+    @_("BREAK")
     def statement(self, p):
         return {"break": True}
-    @_("'begin' statements 'end'")
+    
+    @_("BEGIN statements END")
     def statement(self, p):
         blok_estatements =p[1]
         return blok_estatements
-        
    
-    @_("expr '+' expr")
+    @_("expr '+' expr",
+       "expr '-' expr",
+       "expr '*' expr",
+       "expr '/' expr")
     def expr(self, p):
-        # Suma: expr + expr
-        if len(p) == 3 and p[1] == '+':
-            result = p[0] + p[2]
-        return result
-    @_("expr '-' expr")
+        ...
+    
+    @_("'-' expr",
+       "'+' expr")
     def expr(self, p):
-        # Resta: expr - expr
-        if len(p) == 3 and p[1] == '-':
-            result = p[0] - p[2]
-        return result
-    @_("expr '*' expr")
-    def expr(self, p):
-        #Multiplicación: expr * expr
-        if len(p) == 3 and p[1] == '*':
-            result = p[0] * p[2]
-        return result
-    @_("expr '/' expr")
-    def expr(self, p):
-        # División: expr / expr
-        if len(p) == 3 and p[1] == '/':
-            result = p[0] / p[2]
-        return result
-    @_( "'-' expr")
-    def expr(self, p):
-        # Operador unario '-' (negación)
-        if p[0] == '-':
-            result = -p[1]
-        return result
-    @_( "'+' expr")
-    def expr(self, p):
-        # Operador unario '-' (negación)
-        if p[0] == '+':
-            result = p[1]
-        return result
+        # Operador unario 
+        ...
+
     @_( "'(' expr ')'")
     def expr(self, p):
         # Paréntesis: '(' expr ')'
         if p[0] == '(' and p[2] == ')':
             result = p[1]
         return result
-    @_( "name '(' exprlist ')'")
+
+    @_("NAME '[' expr ']'")
     def expr(self, p):
-        function_call = {
-        "type": "function_call",  # Puedes usar una cadena para identificar el tipo de operación
-        "name": p[0],             # El nombre de la función o método
-        "arguments": p[2]         # La lista de argumentos (resultado de exprlist)
-        }
-        return function_call
-    @_( "name")
+        ...
+
+    @_("NAME '(' exprlist ')'")
     def expr(self, p):
-       # Variable name
-        if isinstance(p[0], str):
-            result = p[0]
-        return result
-    @_( "name '[' int ']'")
+        ...
+
+    @_("NAME")
     def expr(self, p):
-        # Variable con índice: name '[' INT ']'
-         if len(p) == 4 and p[1] == '[' and isinstance(p[2], int) and p[3] == ']':
-            ...
-    @_( "num")
+        ...
+
+    @_("NUM")
     def expr(self, p):
-        # Número entero o flotante
-        if isinstance(p[0], (int, float)):
-            result = p[0]
-        return result
-    @_( "'INT' '(' expr ')'","'FLOAT' '(' expr ')'")
+        ...
+
+    @_("INT '(' expr ')'",
+       "FLOAT '(' expr ')'")
     def expr(self, p):
         # Casting a INT o FLOAT: ('INT' | 'FLOAT') '(' expr ')'
         if len(p) == 4 and p[0] in ['INT', 'FLOAT',"int","float"] and p[1] == '(' and p[3] == ')':
@@ -195,72 +173,66 @@ class Parser(sly.Parser):
                 result = float(p[2])
         return result
     
-    @_("expr (',' expr)+")
+    @_("expr {',' expr}")
     def exprlist(self, p):
         expresion=[p[0]]
         for expr in p[2]:
             expresion.append(expr)
         return expresion
     
-    @_("relation 'and' relation","relation 'or' relation")
+    @_("expr '<' expr",
+       "expr '>' expr",
+       "expr '<=' expr",
+       "expr '>=' expr",
+       "expr '==' expr",
+       "expr '!=' expr")
+    def relation(self, p):
+        ...
+    
+    @_("relation AND relation",
+       "relation OR relation")
     def  relation(self, p):
         if p[1] == 'and':
             result = p[0] and p[2]
         elif p[1] == 'or':
             result = p[0] or p[2]
         return result
-    @_("'NOT' relation ")
+    
+    @_("NOT relation ")
     def  relation(self, p):
         result = not p[1]
         return result
+    
     @_("'(' relation ')'")
     def  relation(self, p):
         return p[1]
-    @_("expr '>' expr",
-       "expr '<' expr,", 
-       "expr '>=' expr",
-       "expr '<=' expr",
-       "expr '==' expr",
-       "expr '!=' expr)")
-    def relation(self, p):
-        if p[1] == '>':
-            result = p[0] > p[2]
-        elif p[1] == '<':
-            result = p[0] < p[2]
-        elif p[1] == '>=':
-            result = p[0] >= p[2]
-        elif p[1] == '<=':
-            result = p[0] <= p[2]
-        elif p[1] == '==':
-            result = p[0] == p[2]
-        elif p[1] == '!=':
-            result = p[0] != p[2]
 
-        return result
-        ...
-    @_("name ':'  'INT' '[' int ']'")
+
+    @_("NAME ':'  'INT' [ '[' expr ']' ]",
+       "NAME ':'  'FLOAT' [ '[' expr ']' ]")
     def  arg(self, p):
         ...
         
-    @_("arg (',' arg)*")
+    @_("arg { ',' arg }")
     def  arglist(self, p):
         ...
     
-    @_("(arg ';' | function ';')*")
+    @_("arg ';' { locals }",
+       "function ';' { locals }")
     def locals(self, p):
         ...
     
-    @_("name ")
+    @_("NAME")
     def location(self, p):
         ...
-    @_("name '[' int ']'")
+    @_("NAME '[' expr ']'")
     def location(self, p):
         ...
     
-    @_("int")
+    @_("INT")
     def num(self, p):
         ...
-    @_("float")
+    @_("FLOAT")
     def num(self, p):
         ...
     
@@ -270,31 +242,15 @@ class Parser(sly.Parser):
 
     @_("(\+|-)?([0]|[1-9][0-9]*)(\.[0-9]+((e|E)(\+|-)?[0-9]+)?")
     def FLOAT(self,p):
-        return p
-    @_("(e|E)(\+|-)?[0-9]+)")
-    def FLOAT(self,p):
-        return p
-    
-    @_("'INT' '[' int ']'") 
-    def array(self, p):
-        valor = p[2]
-        return {"array_declaration": {"type": "INT", "size": valor}}
-    @_("'FLOAT' '[' float ']'") 
-    def array(self, p):
-        valor= p[2] 
-        return {"array_declaration": {"type": "FLOAT", "size": valor}}
+        ...
         
     @_("[a-zA-Z_]+[0-9-a-zA-Z_]*") 
     def name(self, p):
-        return p
+        ...
         
-    @_(".*")
+    @_("'\"' [^\"]* '\"'")
     def  literal(self, p):
-        return p
-   
-
-    
- 
+        ...
 
 if __name__ == '__main__':
     p = Parser()

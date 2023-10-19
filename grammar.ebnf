@@ -64,7 +64,7 @@ expr ::= expr '+' expr
         |NUM
         |('INT' | 'FLOAT') '(' expr ')'
         
-exprlist ::= expr [',' expr]
+exprlist ::= expr {',' expr}
 
 relation ::= expr ('<'|'<='|'>'|'>='|'=='|'!=') expr 
             | relation ('AND'|'OR') relation 
