@@ -158,8 +158,8 @@ class Parser(sly.Parser):
     def expr(self, p):
         ...
 
-    @_("INT '(' expr ')'",
-       "FLOAT '(' expr ')'")
+    @_("INT_T '(' expr ')'",
+       "FLOAT_T '(' expr ')'")
     def expr(self, p):
         # Casting a INT o FLOAT: ('INT' | 'FLOAT') '(' expr ')'
         if len(p) == 4 and p[0] in ['INT', 'FLOAT',"int","float"] and p[1] == '(' and p[3] == ')':
@@ -208,8 +208,8 @@ class Parser(sly.Parser):
         return p[1]
 
 
-    @_("NAME ':'  'INT' [ '[' expr ']' ]",
-       "NAME ':'  'FLOAT' [ '[' expr ']' ]")
+    @_("NAME ':'  INT_T [ '[' expr ']' ]",
+       "NAME ':'  FLOAT_T [ '[' expr ']' ]")
     def  arg(self, p):
         ...
         
@@ -241,7 +241,7 @@ class Parser(sly.Parser):
         return [p.statement] + p.statements
 
     @_("(\+|-)?([0]|[1-9][0-9]*)(\.[0-9]+((e|E)(\+|-)?[0-9]+)?")
-    def FLOAT(self,p):
+    def float(self,p):
         ...
         
     @_("[a-zA-Z_]+[0-9-a-zA-Z_]*") 
