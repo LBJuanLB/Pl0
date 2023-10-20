@@ -5,6 +5,7 @@ Analizador Lexico para el lenguaje BASIC Darmounth 64
 '''
 import logging
 import sly
+from arbol import *
 from plex import Lexer
 
 
@@ -15,17 +16,16 @@ class Parser(sly.Parser):
     debugfile = 'pl0.txt'
 
     tokens = Lexer.tokens
-
     # Implementacion Reglas de la Gramatica
 
     @_("funclist")
     def program(self, p):
-        return p.funclist
-
+        return Program(p.funclist)
+    
     @_("function { function }")
     def funclist(self, p):
-        return p.function
-
+        return p.funclist + [p.function]
+    
     @_("FUN name '(' [ arglist ] ')' locals BEGIN statements END")
     def function(self, p):
         function_name = p.name
@@ -33,152 +33,96 @@ class Parser(sly.Parser):
         locals = p.locals
         statements = p.statements
 
-        function_definition = {
-            "type": "function",
-            "name": function_name,
-            "arguments": arguments,
-            "locals": locals,
-            "body": statements}
-
-        return function_definition
+        return Funtion(function_name, arguments, locals, statements)
     
-   
     @_("statement {';' statement}")
     def statements(self, p):
-        statements_sequence = [p[0]]  # Inicialmente, agregamos la primera declaración a la lista
-        for statement in p[2]:
-            statements_sequence.append(statement)
-
-        return statements_sequence
+        return p.statements + [p.statement]
     
     @_("WHILE relation DO statement")
     def statement(self, p):
-        condition = p[0]  # La condición a evaluar
-        body = p[3]       # El cuerpo del bucle (declaraciones que se ejecutan mientras la condición sea verdadera)
+        return While(p.relation, p.statement)
 
-        while_loop = {
-            "type": "while",
-            "condition": condition,
-            "body": body
-        }
-
-        return while_loop
     @_("IF relation THEN statement [ELSE statement]")
     def statement(self, p):
-        condition = p[1]      # La condición a evaluar
-        true_branch = p[3]    # El bloque de código a ejecutar si la condición es verdadera
-        false_branch = p[5]   # El bloque de código a ejecutar si la condición es falsa
-
-        # Realiza acciones correspondientes a la estructura de control 'if-else'
-        # Puedes tomar medidas para construir una estructura que refleje la estructura de control 'if-else',
-        # incluyendo la condición, el bloque de código verdadero y el bloque de código falso.
-
-        if_else = {
-            "type": "if_else",
-            "condition": condition,
-            "true_branch": true_branch,
-            "false_branch": false_branch
-        }
-
-        return if_else
+        return If(p.relation, p[3], p[5])
 
     @_("location ':=' expr")
     def statement(self, p):
-        # p[1] contiene la ubicación (location) a la que se asignará el valor
-        location = p[0]
-        # p[3] contiene la expresión cuyo valor se asignará a la ubicación
-        expression = p[3]
-        return {"assignment": {"location": location, "value": expression}}
+        return Assign(p.location, p.expr)
     
     @_("PRINT '(' LITERAL ')'")
     def statement(self, p):
-        return p[2]
+        return Print(p[2])
     
     @_("WRITE '(' expr ')'")
     def statement(self, p):
-        return {"write": p[2]}
+        return Write(p.expr)
     
     @_("READ '(' location ')'")
     def statement(self, p):
-        return {"read": p[2]}
+        return Read(p.location)
     
     @_("RETURN expr")
     def statement(self, p):
-        return {"return": p[1]}
+        return Return(p.expr)
         
     @_("NAME '(' exprlist ')'")
     def statement(self, p):
-        ...
+        FunCall(p[0], p[2])
+
     @_("SKIP")
     def statement(self, p):
-        return {"skip": True}
+        return Skip()
     
     @_("BREAK")
     def statement(self, p):
-        return {"break": True}
+        return Break()
     
     @_("BEGIN statements END")
     def statement(self, p):
-        blok_estatements =p[1]
-        return blok_estatements
+        return Begin(p.statements)
    
     @_("expr '+' expr",
        "expr '-' expr",
        "expr '*' expr",
        "expr '/' expr")
     def expr(self, p):
-        ...
+        return Binary(p[1], p[0], p[1])
     
     @_("'-' expr",
        "'+' expr")
     def expr(self, p):
-        # Operador unario 
-        ...
+        return Unary(p[0], p.expr)
 
     @_( "'(' expr ')'")
     def expr(self, p):
-        # Paréntesis: '(' expr ')'
-        if p[0] == '(' and p[2] == ')':
-            result = p[1]
-        return result
+        return p.expr
 
     @_("NAME '[' expr ']'")
     def expr(self, p):
-        ...
+        return ArrayLocation(p[0], p[2])
 
     @_("NAME '(' exprlist ')'")
     def expr(self, p):
-        ...
+        return FunCall(p[0], p[2])
 
     @_("NAME")
     def expr(self, p):
-        ...
+        return SimpleLocation(p[0])
 
     @_("NUM")
     def expr(self, p):
-        ...
+        return p.NUM
 
     @_("INT_T '(' expr ')'",
        "FLOAT_T '(' expr ')'")
     def expr(self, p):
-        # Casting a INT o FLOAT: ('INT' | 'FLOAT') '(' expr ')'
-        if len(p) == 4 and p[0] in ['INT', 'FLOAT',"int","float"] and p[1] == '(' and p[3] == ')':
-            if p[0] == 'INT':
-                result = int(p[2])
-            elif p[0] == 'FLOAT':
-                result = float(p[2])
-            elif p[0] == 'int':
-                result = int(p[2])
-            elif p[0] == 'float':
-                result = float(p[2])
-        return result
+        return TypeCast(p[0], p[2])
     
     @_("expr {',' expr}")
     def exprlist(self, p):
-        expresion=[p[0]]
-        for expr in p[2]:
-            expresion.append(expr)
-        return expresion
+        return p.exprlist + [p.expr]
     
     @_("expr '<' expr",
        "expr '>' expr",
@@ -187,54 +131,50 @@ class Parser(sly.Parser):
        "expr '==' expr",
        "expr '!=' expr")
     def relation(self, p):
-        ...
+        return Relation(p[1], p[0], p[2])
     
     @_("relation AND relation",
        "relation OR relation")
     def  relation(self, p):
-        if p[1] == 'and':
-            result = p[0] and p[2]
-        elif p[1] == 'or':
-            result = p[0] or p[2]
-        return result
+        return Relation(p[1], p[0], p[2])
     
     @_("NOT relation ")
     def  relation(self, p):
-        result = not p[1]
-        return result
+        return Relation(p[0], p[1])
     
     @_("'(' relation ')'")
     def  relation(self, p):
-        return p[1]
-
+        return p.relation
 
     @_("NAME ':'  INT_T [ '[' expr ']' ]",
        "NAME ':'  FLOAT_T [ '[' expr ']' ]")
     def  arg(self, p):
-        ...
+        return Argument(p[0], p[2]+p[4])
         
     @_("arg { ',' arg }")
     def  arglist(self, p):
-        ...
+        return p.arglist + [p.arg]
     
     @_("arg ';' { locals }",
        "function ';' { locals }")
     def locals(self, p):
-        ...
+        return p.locals + [p[0]]
     
     @_("NAME")
     def location(self, p):
-        ...
+        return SimpleLocation(p[0])
+        
     @_("NAME '[' expr ']'")
     def location(self, p):
-        ...
+        return ArrayLocation(p[0], p[2])
     
     @_("INT")
     def num(self, p):
-        ...
+        return Integer(p.int)
+    
     @_("FLOAT")
     def num(self, p):
-        ...
+        return Float(p.float)
     
     @_("((\+|-)?[1-9][0-9]*)|[0]")
     def int(self, p):
