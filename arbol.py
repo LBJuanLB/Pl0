@@ -16,7 +16,24 @@ class Program (Statement):
 
 class Declaration(Statement):
     ...
-    
+
+class Name(Expression):
+    name: str
+
+class Num(Expression):
+    ...
+
+class Integer(Num):
+    value: int
+
+class Float(Num):
+    value: float
+
+class Relation(Expression):
+    op: str
+    left: Expression
+    right: Expression
+
 class Funtion(Declaration):
     name: Name
     arguments: list
@@ -40,7 +57,7 @@ class While(Statement):
     relation: Relation
     statement: Statement
 
-class IF(Statement):
+class If(Statement):
     relation: Relation
     statement: Statement
     if_else : Statement
@@ -83,17 +100,9 @@ class Unary(Expression):
     op: str
     expr: Expression
 
-class Name(Expression):
-    name: str
-
-class Num(Expression):
-    ...
-
-class Integer(Num):
-    value: int
-
-class Float(Num):
-    value: float
+class Argument(Expression):
+    name: Name
+    datatype: DataType
 
 class TypeCast(Expression):
     ...
