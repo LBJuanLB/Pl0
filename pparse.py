@@ -24,9 +24,9 @@ class Parser(sly.Parser):
     
     @_("function { function }")
     def funclist(self, p):
-        return p.funclist + [p.function]
+        return [p.function0] + [p.function1]
     
-    @_("FUN name '(' [ arglist ] ')' locals BEGIN statements END")
+    @_("FUN NAME '(' [ arglist ] ')' locals BEGIN statements END")
     def function(self, p):
         function_name = p.name
         arguments = p.arglist
@@ -35,19 +35,19 @@ class Parser(sly.Parser):
 
         return Funtion(function_name, arguments, locals, statements)
     
-    @_("statement {';' statement}")
+    @_("statement { ';' statement }")
     def statements(self, p):
-        return p.statements + [p.statement]
+        return [p.statement0] + [p.statement1]
     
     @_("WHILE relation DO statement")
     def statement(self, p):
         return While(p.relation, p.statement)
 
-    @_("IF relation THEN statement [ELSE statement]")
+    @_("IF relation THEN statement [ ELSE statement ]")
     def statement(self, p):
         return If(p.relation, p[3], p[5])
 
-    @_("location ':=' expr")
+    @_("location ASIG expr")
     def statement(self, p):
         return Assign(p.location, p.expr)
     
@@ -69,7 +69,7 @@ class Parser(sly.Parser):
         
     @_("NAME '(' exprlist ')'")
     def statement(self, p):
-        FunCall(p[0], p[2])
+        return FunCall(p[0], p[2])
 
     @_("SKIP")
     def statement(self, p):
@@ -111,25 +111,26 @@ class Parser(sly.Parser):
     def expr(self, p):
         return SimpleLocation(p[0])
 
-    @_("NUM")
+    @_("INT",
+       "FLOAT")
     def expr(self, p):
-        return p.NUM
+        return p[0]
 
     @_("INT_T '(' expr ')'",
        "FLOAT_T '(' expr ')'")
     def expr(self, p):
         return TypeCast(p[0], p[2])
     
-    @_("expr {',' expr}")
+    @_("expr { ',' expr }")
     def exprlist(self, p):
-        return p.exprlist + [p.expr]
+        return [p.expr0] + [p.expr1]
     
     @_("expr '<' expr",
        "expr '>' expr",
-       "expr '<=' expr",
-       "expr '>=' expr",
-       "expr '==' expr",
-       "expr '!=' expr")
+       "expr MEI expr",
+       "expr MAI expr",
+       "expr II expr",
+       "expr DI expr")
     def relation(self, p):
         return Relation(p[1], p[0], p[2])
     
@@ -149,11 +150,11 @@ class Parser(sly.Parser):
     @_("NAME ':'  INT_T [ '[' expr ']' ]",
        "NAME ':'  FLOAT_T [ '[' expr ']' ]")
     def  arg(self, p):
-        return Argument(p[0], p[2]+p[4])
+        return Argument(p[0], p[2], p.expr)
         
     @_("arg { ',' arg }")
     def  arglist(self, p):
-        return p.arglist + [p.arg]
+        return [p.arg0] + [ p.arg1 ]
     
     @_("arg ';' { locals }",
        "function ';' { locals }")
@@ -175,22 +176,6 @@ class Parser(sly.Parser):
     @_("FLOAT")
     def num(self, p):
         return Float(p.float)
-    
-    @_("((\+|-)?[1-9][0-9]*)|[0]")
-    def int(self, p):
-        return [p.statement] + p.statements
-
-    @_("(\+|-)?([0]|[1-9][0-9]*)(\.[0-9]+((e|E)(\+|-)?[0-9]+)?")
-    def float(self,p):
-        ...
-        
-    @_("[a-zA-Z_]+[0-9-a-zA-Z_]*") 
-    def name(self, p):
-        ...
-        
-    @_("'\"' [^\"]* '\"'")
-    def  literal(self, p):
-        ...
 
 if __name__ == '__main__':
     p = Parser()
