@@ -17,12 +17,14 @@ table.add_column('end', justify='right')
 
 class Lexer(sly.Lexer):
     tokens = {
+        #Operadores
+        ADD, SUB, MUL, DIV,
         #Palabras Reservadas
         FUN, BEGIN, END, WHILE, DO, IF, THEN, ELSE,
         PRINT, WRITE, READ, RETURN, SKIP, BREAK, INT_T,
         FLOAT_T,
         #Asignacion (:=)
-        ASIG, 
+        ASIG,
 
         #Operadores de Relacion (MEI = Menor igual <=) (MAI = Mayor igual >=) (II = Igual igual ==) (DI = Diferente igual !=)
         AND, OR, NOT, MEI, MAI, II, DI,
@@ -30,8 +32,7 @@ class Lexer(sly.Lexer):
         #Literales
         INT, FLOAT, NAME, LITERAL,
     }
-
-    literals = '+-*/()[],.;:<>"'
+    literals = '()[],.;:<>"'
     ignore = ' \t'
 
     @_(r'\n+')
@@ -51,6 +52,12 @@ class Lexer(sly.Lexer):
     def numbers_error(self,t):
         print(f"Line {self.lineno}. Numero mal escrito {t.value}")
         self.lineno += t.value.count('\n')
+
+    #Operadores
+    ADD = r'\+'
+    SUB = r'-'
+    MUL = r'\*'
+    DIV = r'/'
 
     @_(r'(\+|-)?([0]|[1-9][0-9]*)(\.[0-9]+((e|E)(\+|-)?[0-9]+)?|(e|E)(\+|-)?[0-9]+)')
     def FLOAT(self,t):
@@ -120,7 +127,7 @@ class Lexer(sly.Lexer):
     OR    = r'[Oo][Rr]\b'
     FLOAT_T  = r'[Ff][Ll][Oo][Aa][Tt]\b'
     INT_T = r'[iI][Nn][tT]\b'
-    NAME = r'[a-zA-Z_]+[0-9-a-zA-Z_]*'
+    NAME = r'[a-zA-Z_]+[0-9a-zA-Z_]*'
         
     def error(self, t):
             print(f"Line {self.lineno}. Caracter ilegal '{t.value[0]}'")

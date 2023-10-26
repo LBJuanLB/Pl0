@@ -33,11 +33,11 @@ NAME = r'[a-zA-Z]+[0-9]*[a-zA-Z]*'
 
 program ::= funclist
 
-funclist ::= function {function}
+funclist ::= funclist function | function
 
 function ::= 'FUN' NAME '(' [ arglist ] ')' locals 'BEGIN' statements 'END'
 
-statements ::= statement {';' statement}
+statements ::= statements ';' statement | statement
 
 statement ::= 'WHILE' relation 'DO' statement
              |'IF' relation 'THEN' statement ['ELSE' statement]
@@ -61,10 +61,11 @@ expr ::= expr '+' expr
         |NAME '[' expr ']'
         |NAME '(' exprlist ')'
         |NAME
-        |NUM
+        |INT
+        |FLOAT
         |('INT' | 'FLOAT') '(' expr ')'
         
-exprlist ::= expr {',' expr}
+exprlist ::= exprlist ',' expr | expr
 
 relation ::= expr ('<'|'<='|'>'|'>='|'=='|'!=') expr 
             | relation ('AND'|'OR') relation 
@@ -73,13 +74,11 @@ relation ::= expr ('<'|'<='|'>'|'>='|'=='|'!=') expr
 
 arg ::= NAME ':' ('INT' | 'FLOAT' ) ['[' expr ']']
 
-arglist ::= arg { ',' arg }
+arglist ::= arglist ',' arg | arg
 
 locals ::= (arg | function) ';' {locals}
 
 location ::= NAME | NAME '[' expr ']'
-
-NUM ::= INT | FLOAT
 
 INT ::= ((\+|-)?[1-9][0-9]*)|[0]
 

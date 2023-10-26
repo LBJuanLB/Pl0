@@ -14,7 +14,6 @@ class Parser(sly.Parser):
     log.setLevel(logging.ERROR)
     expected_shift_reduce = 1
     debugfile = 'pl0.txt'
-
     tokens = Lexer.tokens
     # Implementacion Reglas de la Gramatica
 
@@ -22,22 +21,30 @@ class Parser(sly.Parser):
     def program(self, p):
         return Program(p.funclist)
     
-    @_("function { function }")
+    @_("funclist function")
     def funclist(self, p):
-        return [p.function0] + [p.function1]
+        return p.stmtlist + [p.function]
+    
+    @_("function")
+    def funclist(self, p):
+        return [p.function]
     
     @_("FUN NAME '(' [ arglist ] ')' locals BEGIN statements END")
     def function(self, p):
-        function_name = p.name
+        function_name = p.NAME
         arguments = p.arglist
         locals = p.locals
         statements = p.statements
 
         return Funtion(function_name, arguments, locals, statements)
     
-    @_("statement { ';' statement }")
+    @_("statements ';' statement")
     def statements(self, p):
-        return [p.statement0] + [p.statement1]
+        return p.statements + [p.statement]
+    
+    @_("statement")
+    def statements(self, p):
+        return [p.statement]
     
     @_("WHILE relation DO statement")
     def statement(self, p):
@@ -83,15 +90,15 @@ class Parser(sly.Parser):
     def statement(self, p):
         return Begin(p.statements)
    
-    @_("expr '+' expr",
-       "expr '-' expr",
-       "expr '*' expr",
-       "expr '/' expr")
+    @_("expr ADD expr",
+       "expr SUB expr",
+       "expr MUL expr",
+       "expr DIV expr")
     def expr(self, p):
-        return Binary(p[1], p[0], p[1])
+        return Binary(p[1], p[0], p[2])
     
-    @_("'-' expr",
-       "'+' expr")
+    @_("SUB expr",
+       "ADD expr")
     def expr(self, p):
         return Unary(p[0], p.expr)
 
@@ -111,19 +118,26 @@ class Parser(sly.Parser):
     def expr(self, p):
         return SimpleLocation(p[0])
 
-    @_("INT",
-       "FLOAT")
+    @_("INT")
     def expr(self, p):
-        return p[0]
+        return Integer(p[0])
+    
+    @_("FLOAT")
+    def expr(self, p):
+        return Float(p[0])
 
     @_("INT_T '(' expr ')'",
        "FLOAT_T '(' expr ')'")
     def expr(self, p):
         return TypeCast(p[0], p[2])
     
-    @_("expr { ',' expr }")
+    @_("exprlist ',' expr")
     def exprlist(self, p):
-        return [p.expr0] + [p.expr1]
+        return p.exprlist + [p.expr]
+    
+    @_("expr")
+    def exprlist(self, p):
+        return [p.expr]
     
     @_("expr '<' expr",
        "expr '>' expr",
@@ -152,9 +166,13 @@ class Parser(sly.Parser):
     def  arg(self, p):
         return Argument(p[0], p[2], p.expr)
         
-    @_("arg { ',' arg }")
+    @_("arglist ',' arg")
     def  arglist(self, p):
-        return [p.arg0] + [ p.arg1 ]
+        return p.arglist + [p.arg]
+    
+    @_("arg")
+    def  arglist(self, p):
+        return [p.arg]
     
     @_("arg ';' { locals }",
        "function ';' { locals }")
@@ -168,16 +186,31 @@ class Parser(sly.Parser):
     @_("NAME '[' expr ']'")
     def location(self, p):
         return ArrayLocation(p[0], p[2])
-    
-    @_("INT")
-    def num(self, p):
-        return Integer(p.int)
-    
-    @_("FLOAT")
-    def num(self, p):
-        return Float(p.float)
 
+def main(argv):
+    if len(argv) != 2:
+        print(f"Usage: python {argv[0]} filename")
+        exit(1)
+    
+    lex = Lexer()
+    pas = Parser()
+    txt = open(argv[1]).read()
+    ast = pas.parse(lex.tokenize(txt))
+    ##
+    for tok in lex.tokenize(txt):
+        #value=tok.value if isinstance(tok.value , str(tok.value))
+        if isinstance(tok.value, str):
+            value = tok.value
+        else:
+            value = tok.value
+        table.add_row(tok.type,
+                      str(value),
+                      str(tok.lineno),
+                      str(tok.index),
+                      str(tok.end))
+    console = Console()
+    console.print(table)
+    print(ast)
 if __name__ == '__main__':
-    p = Parser()
-    lex=Lexer()
-    p.parse(lex.tokenize)
+    from sys import argv
+    main(argv)
