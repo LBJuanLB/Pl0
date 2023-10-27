@@ -7,9 +7,8 @@ from dataclasses import asdict
 import logging
 import sly
 from arbol import *
-from plex import Lexer
 import arbol
-from rich import print
+from plex import Lexer
 
 class Parser(sly.Parser):
     log = logging.getLogger()
@@ -38,7 +37,7 @@ class Parser(sly.Parser):
         locals = p.locals
         statements = p.statements
 
-        return Funtion(function_name, arguments, locals, statements)
+        return Function(function_name, arguments, locals, statements)
     
     @_("statements ';' statement")
     def statements(self, p):    
@@ -58,7 +57,7 @@ class Parser(sly.Parser):
 
     @_("location ASIG expr")
     def statement(self, p):
-        return Assign(p.location, p.expr)
+        return Assing(p.location, p.expr)
     
     @_("PRINT '(' LITERAL ')'")
     def statement(self, p):
@@ -367,9 +366,7 @@ def main(argv):
     console = Console()
     console.print(table)
     '''
-    print(ast)
-    #print_ast(ast)
-    
+    print_ast(ast)    
 
 def print_ast(node, indent=0):
 

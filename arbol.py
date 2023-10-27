@@ -52,14 +52,14 @@ class Relation(Expression):
     right: Expression
 
 @dataclass
-class Funtion(Declaration):
+class Function(Declaration):
     name: Name
     arguments: list
     locals: list
     statements: list
 
 @dataclass    
-class Assign(Statement):
+class Assing(Statement):
     location: Location
     expr: Expression
 
