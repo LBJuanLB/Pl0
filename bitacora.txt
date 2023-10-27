@@ -62,3 +62,4 @@ Comenzamos a describir las reglas en el parser y a describir los nodos necesario
 CLASE 26/09/23
 Se solucionaron y se hicieron cambios en el parser para que se pudiera ejecutar. 
 El parser se probó con todos los test2. No ejecutó los ejemplos de big----.pl0 porque arrojaba un error de que excedia la recursividad.
+Se agregó que pueda detectar errores
