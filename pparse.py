@@ -211,7 +211,6 @@ def main(argv):
                       str(tok.end))
     console = Console()
     console.print(table)
-    print(ast)
     print_ast(ast)
     
 
