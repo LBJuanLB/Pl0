@@ -3,11 +3,12 @@ basparser
 
 Analizador Lexico para el lenguaje BASIC Darmounth 64
 '''
+from dataclasses import asdict
 import logging
 import sly
 from arbol import *
 from plex import Lexer
-
+import arbol
 
 class Parser(sly.Parser):
     log = logging.getLogger()
@@ -211,6 +212,35 @@ def main(argv):
     console = Console()
     console.print(table)
     print(ast)
+    print_ast(ast)
+    
+
+def print_ast(node, indent=0):
+
+  if indent == 0:
+    print(":::: Parse Tree ::::")
+
+  print("  " * indent, end="")
+
+  if isinstance(node, Program):
+    print("program")
+
+  else:
+    print("+-- " + type(node).__name__)
+
+  for name, value in vars(node).items():
+
+    if isinstance(value, arbol.node):
+      print_ast(value, indent + 2)
+
+    elif isinstance(value, list):
+      for item in value:
+        print_ast(item, indent + 2)
+
+    else:
+      print("  " * (indent + 2), end="")
+      print("|-- " + name, end="") 
+      print(" (" + str(value) + ")")
 if __name__ == '__main__':
     from sys import argv
     main(argv)
