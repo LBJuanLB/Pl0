@@ -24,13 +24,13 @@ class Parser(sly.Parser):
     
     @_("funclist function")
     def funclist(self, p):
-        return p.stmtlist + [p.function]
+        return p.funclist + [p.function]
     
     @_("function")
     def funclist(self, p):
         return [p.function]
     
-    @_("FUN NAME '(' [ arglist ] ')' locals BEGIN statements END")
+    @_("FUN NAME '(' [ arglist ] ')' [ locals ] BEGIN statements END")
     def function(self, p):
         function_name = p.NAME
         arguments = p.arglist
@@ -53,7 +53,7 @@ class Parser(sly.Parser):
 
     @_("IF relation THEN statement [ ELSE statement ]")
     def statement(self, p):
-        return If(p.relation, p[3], p[5])
+        return If(p.relation, p.statement0, p.statement1)
 
     @_("location ASIG expr")
     def statement(self, p):
