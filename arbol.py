@@ -143,7 +143,8 @@ class Argument(Expression):
 
 @dataclass
 class TypeCast(Expression):
-    ...
+    dataType: DataType
+    expr: Expression 
 
 @dataclass
 class FunCall(Expression):

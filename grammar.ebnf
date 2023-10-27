@@ -76,7 +76,9 @@ arg ::= NAME ':' ('INT' | 'FLOAT' ) ['[' expr ']']
 
 arglist ::= arglist ',' arg | arg
 
-locals ::= (arg | function) ';' {locals}
+locals ::= locals (arg | function) ';'
+
+locals ::=  (arg | function) ';'
 
 location ::= NAME | NAME '[' expr ']'
 

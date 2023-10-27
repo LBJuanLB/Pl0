@@ -9,6 +9,7 @@ import sly
 from arbol import *
 from plex import Lexer
 import arbol
+from rich import print
 
 class Parser(sly.Parser):
     log = logging.getLogger()
@@ -40,7 +41,7 @@ class Parser(sly.Parser):
         return Funtion(function_name, arguments, locals, statements)
     
     @_("statements ';' statement")
-    def statements(self, p):
+    def statements(self, p):    
         return p.statements + [p.statement]
     
     @_("statement")
@@ -156,7 +157,7 @@ class Parser(sly.Parser):
     
     @_("NOT relation ")
     def  relation(self, p):
-        return Relation(p[0], p[1])
+        return Relation(p[0], p[1], None)
     
     @_("'(' relation ')'")
     def  relation(self, p):
@@ -175,10 +176,15 @@ class Parser(sly.Parser):
     def  arglist(self, p):
         return [p.arg]
     
-    @_("arg ';' { locals }",
-       "function ';' { locals }")
+    @_("locals arg ';' ",
+       "locals function ';'")
     def locals(self, p):
-        return p.locals + [p[0]]
+        return p.locals + [p[1]]
+    
+    @_("arg ';' ",
+       "function ';'")
+    def locals(self, p):
+        return [p[0]]
     
     @_("NAME")
     def location(self, p):
@@ -187,6 +193,155 @@ class Parser(sly.Parser):
     @_("NAME '[' expr ']'")
     def location(self, p):
         return ArrayLocation(p[0], p[2])
+    
+    #ERRORES
+    @_("error")
+    def program(self, p):
+        print(f"Error de sintaxis: No ingresó funciones. Linea {p.lineno}")
+
+    @_("funclist error")
+    def funclist(self, p):
+        print(f"Error de sintaxis: No ingresó funciones. Linea {p.lineno}")
+
+    @_("NAME")
+    def funclist(self, p):
+        print(f"Error de sintaxis: Una funcion debe empezar con fun. Linea {p.lineno}")
+
+    @_("FUN error '(' [ arglist ] ')' [ locals ] BEGIN statements END")
+    def function(self, p):
+        print(f"Error de sintaxis: No ingresó nombre de funcion. Linea {p.lineno}")
+
+    @_("statements error statement")
+    def statements(self, p):
+        print(f"Error de sintaxis: Falto el ';' para separar sentencias. Linea {p.lineno}")
+
+    @_("error")
+    def statements(self, p):
+        print(f"Error de sintaxis: No ingresó sentencias. Linea {p.lineno}")
+
+    @_("WHILE error DO statement")
+    def statement(self, p):
+        print(f"Error de sintaxis: Falto la condicion del while. Linea {p.lineno}")
+    
+    @_("IF error THEN statement [ ELSE statement ]")
+    def statement(self, p):
+        print(f"Error de sintaxis: Falto la condicion del if. Linea {p.lineno}")
+    
+    @_("location error expr")
+    def statement(self, p):
+        print(f"Error de sintaxis: Falto el operador de asignacion. Linea {p.lineno}")
+
+    @_("PRINT '(' error ')'")
+    def statement(self, p):
+        print(f"Error de sintaxis: Falto la cadena de texto a imprimir. Linea {p.lineno}")
+
+    @_("WRITE '(' error ')'")
+    def statement(self, p):
+        print(f"Error de sintaxis: Falto la expresion a imprimir. Linea {p.lineno}")
+    
+    @_("READ '(' error ')'")
+    def statement(self, p):
+        print(f"Error de sintaxis: Falto la variable a leer. Linea {p.lineno}")
+    
+    @_("RETURN error")
+    def statement(self, p):
+        print(f"Error de sintaxis: Falto la expresion a retornar. Linea {p.lineno}")
+    
+
+    @_("BEGIN error END")
+    def statement(self, p):
+        print(f"Error de sintaxis: Un begin no puede estar sin sentencias. Linea {p.lineno}")
+    
+    @_("expr error expr")
+    def expr(self, p):
+        print(f"Error de sintaxis: Falto el operador. Linea {p.lineno}")
+    
+    @_("SUB error",
+         "ADD error")
+    def expr(self, p):
+        print(f"Error de sintaxis: Falto la expresion. Linea {p.lineno}")   
+    
+    @_("'(' error ')'")
+    def expr(self, p):
+        print(f"Error de sintaxis: Falto la expresion. Linea {p.lineno}")
+
+    @_("NAME '[' error ']'")
+    def expr(self, p):
+        print(f"Error de sintaxis: Falto la expresion en el llamado de lista. Linea {p.lineno}")
+
+    @_("INT_T '(' error ')'",
+       "FLOAT_T '(' error ')'")
+    def expr(self, p):
+        print(f"Error de sintaxis: Falto la expresion en el casteo. Linea {p.lineno}")
+
+    @_("exprlist error expr")
+    def exprlist(self, p):
+        print(f"Error de sintaxis: Falto la ',' expresion en la lista de expresiones. Linea {p.lineno}")
+
+    @_("error")
+    def exprlist(self, p):  
+        print(f"Error de sintaxis: Falto la expresion en la lista de expresiones. Linea {p.lineno}")
+
+    @_("expr '<' error",
+         "expr '>' error",
+         "expr MEI error",
+         "expr MAI error",
+         "expr II error",
+         "expr DI error")
+    def relation(self, p):
+        print(f"Error de sintaxis: Falto la expresion izq. Linea {p.lineno}")
+
+    @_("error '<' expr",
+         "error '>' expr",
+         "error MEI expr",
+         "error MAI expr",
+         "error II expr",
+         "error DI expr")
+    def relation(self, p):
+        print(f"Error de sintaxis: Falto la expresion der. Linea {p.lineno}")
+    
+    @_("relation error relation")
+    def  relation(self, p):
+        print(f"Error de sintaxis: Falto el operador AND u OR. Linea {p.lineno}")
+    
+    @_("NOT error")
+    def  relation(self, p):
+        print(f"Error de sintaxis: Falto la relacion a negar. Linea {p.lineno}")
+
+    @_("'(' error ')'")
+    def  relation(self, p):
+        print(f"Error de sintaxis: Falto la relacion. Linea {p.lineno}")
+
+    @_("NAME ':'  INT_T error",
+         "NAME ':'  FLOAT_T error")
+    def  arg(self, p):
+        print(f"Error de sintaxis: Falto la expresion en el argumento. Linea {p.lineno}")
+
+    @_("arglist error arg")
+    def  arglist(self, p):
+        print(f"Error de sintaxis: Falto la ',' en la lista de argumentos. Linea {p.lineno}")
+
+    @_("error")
+    def  arglist(self, p):
+        print(f"Error de sintaxis: Falto el argumento. Linea {p.lineno}")
+
+    @_("arg ';' error",
+        "function ';' error")
+    def locals(self, p):
+        print(f"Error de sintaxis: Falto la declaracion de variables. Linea {p.lineno}")
+
+    @_("error")
+    def locals(self, p):
+        print(f"Error de sintaxis: Falto la declaracion de variables. Linea {p.lineno}")
+    
+    @_("error")
+    def location(self, p):
+        print(f"Error de sintaxis: Error al llamar la variable. Linea {p.lineno}")
+
+    @_("NAME '[' error ']'")
+    def location(self, p):
+        print(f"Error de sintaxis: Error al llamar la variable. Linea {p.lineno}")
+
 
 def main(argv):
     if len(argv) != 2:
@@ -197,7 +352,7 @@ def main(argv):
     pas = Parser()
     txt = open(argv[1]).read()
     ast = pas.parse(lex.tokenize(txt))
-    ##
+    '''
     for tok in lex.tokenize(txt):
         #value=tok.value if isinstance(tok.value , str(tok.value))
         if isinstance(tok.value, str):
@@ -211,7 +366,9 @@ def main(argv):
                       str(tok.end))
     console = Console()
     console.print(table)
-    print_ast(ast)
+    '''
+    print(ast)
+    #print_ast(ast)
     
 
 def print_ast(node, indent=0):
