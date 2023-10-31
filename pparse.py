@@ -9,6 +9,7 @@ import sly
 from arbol import *
 import arbol
 from plex import Lexer
+from AST import *
 
 class Parser(sly.Parser):
     log = logging.getLogger()
@@ -165,7 +166,10 @@ class Parser(sly.Parser):
     @_("NAME ':'  INT_T [ '[' expr ']' ]",
        "NAME ':'  FLOAT_T [ '[' expr ']' ]")
     def  arg(self, p):
-        return Argument(p[0], p[2], p.expr)
+        if p.expr != None:
+           return Argument(p[0], ArrayType(p[2], p.expr))
+        else:
+              return Argument(p[0], SimpleType(p[2])) 
         
     @_("arglist ',' arg")
     def  arglist(self, p):
@@ -366,8 +370,12 @@ def main(argv):
     console = Console()
     console.print(table)
     '''
-    print_ast(ast)    
-
+    #Imprimir AST en consola
+    print_ast(ast)
+    #Imprimir AST en Graphviz
+    with open('graph.dot','w') as archivo:
+        archivo.write(str(Dot.render(ast)))
+    
 def print_ast(node, indent=0):
 
   if indent == 0:

@@ -1,9 +1,14 @@
 from plex import *
 from dataclasses import dataclass
+from multimethod import multimeta
+
+class Visitor(metaclass=multimeta):
+  ...
 
 @dataclass
-class node :
-    ...
+class node:
+  def accept(self, v:Visitor, *args, **kwargs):
+    return v.visit(self, *args, **kwargs)
 
 @dataclass
 class Statement(node):
@@ -139,7 +144,6 @@ class Unary(Expression):
 class Argument(Expression):
     name: Name
     datatype: DataType
-    expr: Expression
 
 @dataclass
 class TypeCast(Expression):
