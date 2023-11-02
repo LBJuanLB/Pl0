@@ -47,6 +47,7 @@ class Relation(Expression):
     op: str
     left: Expression
     right: Expression
+    datatype: DataType
 
 @dataclass
 class Function(Declaration):
@@ -54,6 +55,7 @@ class Function(Declaration):
     arguments: list
     locals: list
     statements: list
+    datatype: DataType
 
 @dataclass    
 class Assing(Statement):
@@ -86,6 +88,7 @@ class If(Statement):
 @dataclass
 class Return(Statement):
     expr: Expression
+    datatype: DataType
 
 @dataclass
 class Skip(Statement):
@@ -126,11 +129,13 @@ class Binary(Expression):
     op: str
     left: Expression
     right: Expression
+    datatype: DataType
 
 @dataclass
 class Unary(Expression):
     op: str
     expr: Expression
+    datatype: DataType
 
 @dataclass
 class Argument(Declaration):
