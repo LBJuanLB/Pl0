@@ -39,16 +39,8 @@ class Name(Expression):
     name: str
 
 @dataclass
-class Num(Expression):
+class Literal(Expression):
     ...
-
-@dataclass
-class Integer(Num):
-    value: int
-
-@dataclass
-class Float(Num):
-    value: float
 
 @dataclass
 class Relation(Expression):
@@ -126,7 +118,7 @@ class ArrayLocation(Location):
     expr: Expression
 
 @dataclass
-class Literal(Expression):
+class String(Expression):
     cadena: str 
 
 @dataclass
@@ -141,7 +133,7 @@ class Unary(Expression):
     expr: Expression
 
 @dataclass
-class Argument(Expression):
+class Argument(Declaration):
     name: Name
     datatype: DataType
 
@@ -154,3 +146,13 @@ class TypeCast(Expression):
 class FunCall(Expression):
     name: Name
     exprlist: list
+
+@dataclass
+class Integer(Literal):
+    value: int
+    datatype: DataType = SimpleType(Name("int"))
+
+@dataclass
+class Float(Literal):
+    value: float
+    datatype: DataType = SimpleType(Name("float"))

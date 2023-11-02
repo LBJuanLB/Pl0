@@ -3,306 +3,85 @@ digraph AST {
 	edge [arrowhead=none]
 	n1 [label=Program]
 	n2 [label="FuncDefinition
-mod"]
+fact"]
 	n3 [label=ArgList]
 	n4 [label="Argument
- x:int" color=chartreuse]
-	n3 -> n4
-	n5 [label="Argument
- y:int" color=chartreuse]
-	n3 -> n5
-	n2 -> n3
-	n6 [label=StmtList]
-	n7 [label=Return]
-	n8 [label="-" color=darkgoldenrod shape=circle]
-	n9 [label="SimpleLocation 
-x" color=chartreuse]
-	n8 -> n9
-	n10 [label="*" color=darkgoldenrod shape=circle]
-	n11 [label="/" color=darkgoldenrod shape=circle]
-	n12 [label="SimpleLocation 
-x" color=chartreuse]
-	n11 -> n12
-	n13 [label="SimpleLocation 
-y" color=chartreuse]
-	n11 -> n13
-	n10 -> n11
-	n14 [label="SimpleLocation 
-y" color=chartreuse]
-	n10 -> n14
-	n8 -> n10
-	n7 -> n8
-	n6 -> n7
-	n2 -> n6
-	n1 -> n2
-	n15 [label="FuncDefinition
-factor"]
-	n16 [label=ArgList]
-	n17 [label="Argument
  n:int" color=chartreuse]
+	n3 -> n4
+	n2 -> n3
+	n5 [label=StmtList]
+	n6 [label=IfStmt]
+	n7 [label="==" color=darkgoldenrod shape=circle]
+	n8 [label="SimpleLocation 
+n" color=chartreuse]
+	n7 -> n8
+	n9 [label="Integer
+1" color=chartreuse]
+	n7 -> n9
+	n6 -> n7
+	n10 [label=Return]
+	n11 [label="Integer
+1" color=chartreuse]
+	n10 -> n11
+	n6 -> n10
+	n12 [label=Return]
+	n13 [label="*" color=darkgoldenrod shape=circle]
+	n14 [label="SimpleLocation 
+n" color=chartreuse]
+	n13 -> n14
+	n15 [label="FunCall (fact)"]
+	n16 [label=ArgList shape=point]
+	n17 [label="-" color=darkgoldenrod shape=circle]
+	n18 [label="SimpleLocation 
+n" color=chartreuse]
+	n17 -> n18
+	n19 [label="Integer
+1" color=chartreuse]
+	n17 -> n19
 	n16 -> n17
-	n18 [label="Argument
- stor:int[1024]" color=chartreuse]
-	n16 -> n18
 	n15 -> n16
-	n19 [label=LocalsList]
-	n20 [label="Argument
- i:int" color=chartreuse]
-	n19 -> n20
-	n21 [label="Argument
- nfacts:int" color=chartreuse]
-	n19 -> n21
-	n15 -> n19
-	n22 [label=StmtList]
-	n23 [label=Assign]
-	n24 [label="SimpleLocation 
-nfacts" color=chartreuse]
-	n23 -> n24
-	n25 [label="Integer
-1" color=chartreuse]
-	n23 -> n25
-	n22 -> n23
-	n26 [label=Assign]
-	n27 [label="ArrayLocation 
-stor" color=chartreuse]
-	n28 [label="Integer
-0" color=chartreuse]
-	n27 -> n28
-	n26 -> n27
-	n29 [label="Integer
-1" color=chartreuse]
-	n26 -> n29
-	n22 -> n26
-	n30 [label=Assign]
-	n31 [label="SimpleLocation 
-i" color=chartreuse]
-	n30 -> n31
-	n32 [label="Integer
-2" color=chartreuse]
-	n30 -> n32
-	n22 -> n30
-	n33 [label=While]
-	n34 [label="<=" color=darkgoldenrod shape=circle]
-	n35 [label="SimpleLocation 
-i" color=chartreuse]
-	n34 -> n35
-	n36 [label="SimpleLocation 
-n" color=chartreuse]
-	n34 -> n36
-	n33 -> n34
-	n37 [label="Begin 
-StmtList"]
-	n38 [label=IfStmt]
-	n39 [label="==" color=darkgoldenrod shape=circle]
-	n40 [label="FunCall (mod)"]
-	n41 [label=ArgList shape=point]
-	n42 [label="SimpleLocation 
-n" color=chartreuse]
-	n41 -> n42
-	n43 [label="SimpleLocation 
-i" color=chartreuse]
-	n41 -> n43
-	n40 -> n41
-	n39 -> n40
-	n44 [label="Integer
-0" color=chartreuse]
-	n39 -> n44
-	n38 -> n39
-	n45 [label="Begin 
-StmtList"]
-	n46 [label=Assign]
-	n47 [label="SimpleLocation 
-nfacts" color=chartreuse]
-	n46 -> n47
-	n48 [label="+" color=darkgoldenrod shape=circle]
-	n49 [label="SimpleLocation 
-nfacts" color=chartreuse]
-	n48 -> n49
-	n50 [label="Integer
-1" color=chartreuse]
-	n48 -> n50
-	n46 -> n48
-	n45 -> n46
-	n51 [label=Assign]
-	n52 [label="ArrayLocation 
-stor" color=chartreuse]
-	n53 [label="-" color=darkgoldenrod shape=circle]
-	n54 [label="SimpleLocation 
-i" color=chartreuse]
-	n53 -> n54
-	n55 [label="Integer
-1" color=chartreuse]
-	n53 -> n55
-	n52 -> n53
-	n51 -> n52
-	n56 [label="SimpleLocation 
-i" color=chartreuse]
-	n51 -> n56
-	n45 -> n51
-	n38 -> n45
-	n37 -> n38
-	n57 [label=Assign]
-	n58 [label="SimpleLocation 
-i" color=chartreuse]
-	n57 -> n58
-	n59 [label="+" color=darkgoldenrod shape=circle]
-	n60 [label="SimpleLocation 
-i" color=chartreuse]
-	n59 -> n60
-	n61 [label="Integer
-1" color=chartreuse]
-	n59 -> n61
-	n57 -> n59
-	n37 -> n57
-	n33 -> n37
-	n22 -> n33
-	n62 [label=Return]
-	n63 [label="SimpleLocation 
-nfacts" color=chartreuse]
-	n62 -> n63
-	n22 -> n62
-	n15 -> n22
-	n1 -> n15
-	n64 [label="FuncDefinition
-print_arr"]
-	n65 [label=ArgList]
-	n66 [label="Argument
- a:int[1024]" color=chartreuse]
-	n65 -> n66
-	n67 [label="Argument
- nelem:int" color=chartreuse]
-	n65 -> n67
-	n64 -> n65
-	n68 [label=LocalsList]
-	n69 [label="Argument
- i:int" color=chartreuse]
-	n68 -> n69
-	n64 -> n68
-	n70 [label=StmtList]
-	n71 [label=Assign]
-	n72 [label="SimpleLocation 
-i" color=chartreuse]
-	n71 -> n72
-	n73 [label="Integer
-0" color=chartreuse]
-	n71 -> n73
-	n70 -> n71
-	n74 [label=While]
-	n75 [label="<" color=darkgoldenrod shape=circle]
-	n76 [label="SimpleLocation 
-i" color=chartreuse]
-	n75 -> n76
-	n77 [label="SimpleLocation 
-nelem" color=chartreuse]
-	n75 -> n77
-	n74 -> n75
-	n78 [label="Begin 
-StmtList"]
-	n79 [label=Write]
-	n80 [label="ArrayLocation 
-a" color=chartreuse]
-	n81 [label="SimpleLocation 
-i" color=chartreuse]
-	n80 -> n81
-	n79 -> n80
-	n78 -> n79
-	n82 [label="Print
-\" \""]
-	n78 -> n82
-	n83 [label=IfStmt]
-	n84 [label=and color=darkgoldenrod shape=circle]
-	n85 [label="==" color=darkgoldenrod shape=circle]
-	n86 [label="FunCall (mod)"]
-	n87 [label=ArgList shape=point]
-	n88 [label="SimpleLocation 
-i" color=chartreuse]
-	n87 -> n88
-	n89 [label="Integer
-5" color=chartreuse]
-	n87 -> n89
-	n86 -> n87
-	n85 -> n86
-	n90 [label="Integer
-0" color=chartreuse]
-	n85 -> n90
-	n84 -> n85
-	n91 [label="!=" color=darkgoldenrod shape=circle]
-	n92 [label="SimpleLocation 
-i" color=chartreuse]
-	n91 -> n92
-	n93 [label="Integer
-0" color=chartreuse]
-	n91 -> n93
-	n84 -> n91
-	n83 -> n84
-	n94 [label="Print
-\"\n\""]
-	n83 -> n94
-	n78 -> n83
-	n95 [label=Assign]
-	n96 [label="SimpleLocation 
-i" color=chartreuse]
-	n95 -> n96
-	n97 [label="+" color=darkgoldenrod shape=circle]
-	n98 [label="SimpleLocation 
-i" color=chartreuse]
-	n97 -> n98
-	n99 [label="Integer
-1" color=chartreuse]
-	n97 -> n99
-	n95 -> n97
-	n78 -> n95
-	n74 -> n78
-	n70 -> n74
-	n64 -> n70
-	n1 -> n64
-	n100 [label="FuncDefinition
+	n13 -> n15
+	n12 -> n13
+	n6 -> n12
+	n5 -> n6
+	n2 -> n5
+	n1 -> n2
+	n20 [label="FuncDefinition
 main"]
-	n101 [label=LocalsList]
-	n102 [label="Argument
+	n21 [label=LocalsList]
+	n22 [label="Argument
  x:int" color=chartreuse]
-	n101 -> n102
-	n103 [label="Argument
- nfs:int" color=chartreuse]
-	n101 -> n103
-	n104 [label="Argument
- results:int[1024]" color=chartreuse]
-	n101 -> n104
-	n100 -> n101
-	n105 [label=StmtList]
-	n106 [label="Print
+	n21 -> n22
+	n23 [label="Argument
+ r:int" color=chartreuse]
+	n21 -> n23
+	n20 -> n21
+	n24 [label=StmtList]
+	n25 [label="Print
 \"Entre un numero\n\""]
-	n105 -> n106
-	n107 [label=Read]
-	n108 [label="SimpleLocation 
+	n24 -> n25
+	n26 [label=Read]
+	n27 [label="SimpleLocation 
 x" color=chartreuse]
-	n107 -> n108
-	n105 -> n107
-	n109 [label=Assign]
-	n110 [label="SimpleLocation 
-nfs" color=chartreuse]
-	n109 -> n110
-	n111 [label="FunCall (factor)"]
-	n112 [label=ArgList shape=point]
-	n113 [label="SimpleLocation 
+	n26 -> n27
+	n24 -> n26
+	n28 [label=Assign]
+	n29 [label="SimpleLocation 
+r" color=chartreuse]
+	n28 -> n29
+	n30 [label="FunCall (fact)"]
+	n31 [label=ArgList shape=point]
+	n32 [label="SimpleLocation 
 x" color=chartreuse]
-	n112 -> n113
-	n114 [label="SimpleLocation 
-results" color=chartreuse]
-	n112 -> n114
-	n111 -> n112
-	n109 -> n111
-	n105 -> n109
-	n115 [label="FunCall (print_arr)"]
-	n116 [label=ArgList shape=point]
-	n117 [label="SimpleLocation 
-results" color=chartreuse]
-	n116 -> n117
-	n118 [label="SimpleLocation 
-nfs" color=chartreuse]
-	n116 -> n118
-	n115 -> n116
-	n105 -> n115
-	n100 -> n105
-	n1 -> n100
+	n31 -> n32
+	n30 -> n31
+	n28 -> n30
+	n24 -> n28
+	n33 [label=Write]
+	n34 [label="SimpleLocation 
+r" color=chartreuse]
+	n33 -> n34
+	n24 -> n33
+	n20 -> n24
+	n1 -> n20
 }

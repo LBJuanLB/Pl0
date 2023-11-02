@@ -196,7 +196,7 @@ class Parser(sly.Parser):
     @_("NAME '[' expr ']'")
     def location(self, p):
         return ArrayLocation(p[0], p[2])
-    
+
     #ERRORES
     @_("error")
     def program(self, p):
