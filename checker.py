@@ -66,29 +66,27 @@ class Checker(Visitor):
     def visit(self, n: Program, env: Symtab):
         # Crear un nuevo contexto (Symtab global)
         Table = Symtab()
-        Table.__init__(self, parent=Program)
         # Visitar cada una de las declaraciones asociadas
         for funt in n.funlist:
-            Table.add(funt.accept(self, Table))
+            funt.accept(self, Table)
 
     def visit(self, n: Function, env: Symtab):
         # Agregar el nombre de la funcion a Symtab
         env.add(n.name, n)
         # Crear un nuevo contexto (Symtab)
-        Table = Symtab()
-        Table.__init__(self, parent=Function)
+        Table = Symtab(env)
         # Visitar ParamList
         if n.arguments != None:
             for arg in n.arguments:
-                Table.add(arg.accept(self, Table))
+                arg.accept(self, Table)
         # Visitar VarList
         if n.locals != None:
             for local in n.locals:
-                Table.add(local.accept(self, Table))
+                local.accept(self, Table)
         # Visitar StmtList
         if n.statements != None:
             for stmt in n.statements:
-                Table.add(stmt.accept(self, Table))
+                stmt.accept(self, Table)
         # Determinar el datatype de la funcion (revisando instrucciones return)
         return Table.get(n.name)
 
