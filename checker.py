@@ -87,20 +87,26 @@ class Checker(Visitor):
         if n.statements != None:
             for stmt in n.statements:
                 stmt.accept(self, Table)
-        # Determinar el datatype de la funcion (revisando instrucciones return)
-        return Table.get(n.name)
+                 # Determinar el datatype de la funcion (revisando instrucciones return)
+                if isinstance(stmt, Return):
+                    datatype=stmt.datatype
+        return datatype
 
     def visit(self, n: Name, env: Symtab):
         # Buscar el nombre en Symtab
-        return env.get(n.name)
+        nombre=env.get(n.name)
+        if nombre == None:
+            raise TypeError(f'No se encuentra {n.name}')
 
     def visit(self, n: Literal, env: Symtab):
         # Devolver datatype
-        return n.accept(self, env)
+        return n.datatype.name
     
     def visit(self, n: Location, env: Symtab):
         # Buscar en Symtab y extraer datatype (No se encuentra?)
         node = env.get(n.name)
+        if node == None:
+            raise TypeError(f'No se encuentra {n.name}')
         # Devuelvo el datatype
         return node.datatype
 
@@ -125,45 +131,89 @@ class Checker(Visitor):
     def visit(self, n: FunCall, env: Symtab):
         # Buscar la funcion en Symtab (extraer: Tipo de retorno, el # de parametros)
         node = env.get(n.name)
+        #Tipo de retorno
+        datatype=node.datatype
         #Num Parametros
         NumParm=len(node.arguments)   
         # Visitar la lista de Argumentos
-        if n.arguments != None:
-            for arg in n.arguments:
-                arg.accept(self, env)
+        listdtype=[]
+        if n.exprlist != None:
+            for arg in n.exprlist:
+                listdtype.append(arg.accept(self, env))
         # Comparar el numero de argumentos con parametros
-
+        if NumParm != len(n.exprlist):
+            raise TypeError(f'Numero de argumentos incorrecto')
         # Comparar cada uno de los tipos de los argumentos con los parametros
+        j=0
+        for i in node.arguments:
+            if i.datatype != listdtype[j]:
+                raise TypeError(f'Argumento incorrecto')
+            j+=1
         # Retornar el datatype de la funcion
+        return datatype
 
     def visit(self, n: Binary, env: Symtab):
         # Visitar el hijo izquierdo (devuelve datatype)
+        izq = n.left.accept(self, env)
         # Visitar el hijo derecho (devuelve datatype)
+        der = n.right.accept(self, env)
         # Comparar ambos tipo de datatype
+        datatype=check_binary_op(n.op, izq, der)
+        if datatype == None:
+            raise TypeError(f'No se puede operar {izq} con {der}')
+        else:
+            n.datatype=datatype
+            env.add(n.name, n)
+            return datatype
 
-    def visit(self, n: Logical, env: Symtab):
+    def visit(self, n: Relation, env: Symtab):
         # Visitar el hijo izquierdo (devuelve datatype)
+        izq=n.left.accept(self, env)
         # Visitar el hijo derecho (devuelve datatype)
+        der=n.right.accept(self, env)
         # Comparar ambos tipo de datatype
+        datatype=check_binary_op(n.op, izq, der)
+        if datatype == None:
+            raise TypeError(f'No se puede operar {izq} con {der}')
+        else:
+            n.datatype=datatype
+            env.add(n.name, n)
+            return datatype
 
     def visit(self, n: Unary, env: Symtab):
         # Visitar la expression asociada (devuelve datatype)
+        data_type_expr=n.expr.accept(self, env)
         # Comparar datatype
+        datatype=check_unary_op(n.op, data_type_expr)
+        if datatype == None:
+            raise TypeError(f'No se puede operar {data_type_expr}')
+        else:
+            n.datatype=datatype
+            env.add(n.name, n)
+            return datatype
 
-    def visit(self, n: VarDefinition, env: Symtab):
-        # Agregar el nombre de la variable a Symtab
-
-    def visit(self, n: Parameter, env: Symtab):
+    def visit(self, n: Argument, env: Symtab):
         # Agregar el nombre del parametro a Symtab
+        env.add(n.name, n)
+        return n.datatype
 
     def visit(self, n: Print, env: Symtab):
         ...     
 
     def visit(self, n: Write, env: Symtab):
         # Buscar la Variable en Symtab
-
+        nodo=env.get(n.expr.name)
+        if nodo == None:
+            raise TypeError(f'No se encuentra {n.expr.name}')
+        else:
+            return nodo.datatype
     def visit(self, n: Read, env: Symtab):
         # Buscar la Variable en Symtab
+        nodo=env.get(n.expr.name)
+        if nodo == None:
+            raise TypeError(f'No se encuentra {n.expr.name}')
+        else:
+            return nodo.datatype
 
     def visit(self, n: While, env: Symtab):
         # Visitar la condicion del While (Comprobar tipo bool)
