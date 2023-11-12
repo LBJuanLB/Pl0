@@ -155,9 +155,9 @@ class FunCall(Expression):
 @dataclass
 class Integer(Literal):
     value: int
-    datatype: DataType = SimpleType(Name("int"))
+    datatype: SimpleType(Name("int"))
 
 @dataclass
 class Float(Literal):
     value: float
-    datatype: DataType = SimpleType(Name("float"))
+    datatype: SimpleType(Name("float"))

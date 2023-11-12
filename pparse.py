@@ -10,6 +10,7 @@ from arbol import *
 import arbol
 from plex import Lexer
 from AST import *
+from checker import *
 
 class Parser(sly.Parser):
     log = logging.getLogger()
@@ -74,7 +75,7 @@ class Parser(sly.Parser):
     
     @_("RETURN expr")
     def statement(self, p):
-        return Return(p.expr)
+        return Return(p.expr, None)
         
     @_("NAME '(' exprlist ')'")
     def statement(self, p):
@@ -122,11 +123,11 @@ class Parser(sly.Parser):
 
     @_("INT")
     def expr(self, p):
-        return Integer(p[0])
+        return Integer(p[0],SimpleType("INT_T"))
     
     @_("FLOAT")
     def expr(self, p):
-        return Float(p[0])
+        return Float(p[0],SimpleType("FLOAT_T"))
 
     @_("INT_T '(' expr ')'",
        "FLOAT_T '(' expr ')'")
@@ -353,8 +354,10 @@ def main(argv):
     
     lex = Lexer()
     pas = Parser()
+    
     txt = open(argv[1]).read()
     ast = pas.parse(lex.tokenize(txt))
+    Checker.checker(ast)
     '''
     for tok in lex.tokenize(txt):
         #value=tok.value if isinstance(tok.value , str(tok.value))

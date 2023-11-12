@@ -62,7 +62,11 @@ class Symtab:
         return None
 
 class Checker(Visitor):
-
+    @classmethod
+    def checker(cls, n:node):
+        c=cls()
+        return n.accept(c, Symtab())
+        
     def visit(self, n: Program, env: Symtab):
         # Crear un nuevo contexto (Symtab global)
         Table = Symtab()
