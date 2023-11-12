@@ -217,30 +217,55 @@ class Checker(Visitor):
 
     def visit(self, n: While, env: Symtab):
         # Visitar la condicion del While (Comprobar tipo bool)
+        condition_type = n.relation.accept(self, env)
+        if condition_type != 'bool':
+            raise TypeError(f'Tipo incorrecto para la condición del While. Se esperaba "bool", pero se encontró "{condition_type}".')
+
         # Visitar las Stmts
+        for stmt in n.statement:
+            stmt.accept(self, env)
+        
 
     def visit(self, n: Break, env: Symtab):
         # Esta dentro de un While?
+        current_env = env
+        while current_env is not None:
+            if isinstance(current_env, While):
+                return True
+                
+        #current_env = current_env.parent
+        raise ValueError('La instrucción "Break" debe estar dentro de un bucle "While".')
 
-    def visit(self, n: IfStmt, env: Symtab):
+    def visit(self, n: If, env: Symtab):
         # Visitar la condicion del IfStmt (Comprobar tipo bool)
-        # Visitar las Stmts del then y else
+        condition_type = n.relation.accept(self, env)
+        if condition_type != 'bool':
+            raise TypeError(f'Tipo incorrecto para la condición del If. Se esperaba "bool", pero se encontró "{condition_type}".')
+
+        # Visitar las Stmts del then
+        for stmt in n.statement:
+            stmt.accept(self, env)
+
+        # Visitar las Stmts del else, si existen
+        if n.if_else is not None:
+            for stmt in n.if_else:
+                stmt.accept(self, env)
+        
 
     def visit(self, n: Return, env: Symtab):
         # Visitar la expresion asociada
+        expr_type = n.expr.accept(self, env)
         # Actualizar el datatype de la funcion
+        n.datatype = expr_type
+        env.add(n.name, n)
+        return expr_type
+            
 
     def visit(self, n: Skip, env: Symtab):
         ...
 
-    def visit(self, n: StmtList, env: Symtab):
+    def visit(self, n: Begin, env: Symtab):
         # Visitar cada una de las instruciones asociadas
+        for stmt in n.statements:
+            stmt.accept(self, env)
 
-    def visit(self, n: VarList, env: Symtab):
-        # Visitar cada una de las variables asociadas
-
-    def visit(self, n: ParmList, env: Symtab):
-        # Visitar cada una de los parametros asociados
-
-    def visit(self, n: ArgList, env: Symtab):
-        # Visitar cada una de los argumentos asociados
