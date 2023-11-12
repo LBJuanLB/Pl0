@@ -63,3 +63,20 @@ CLASE 26/09/23
 Se solucionaron y se hicieron cambios en el parser para que se pudiera ejecutar. 
 El parser se probó con todos los test2. No ejecutó los ejemplos de big----.pl0 porque arrojaba un error de que excedia la recursividad.
 Se agregó que pueda detectar errores
+Clase 2/11/23:
+
+Se implementó un método para imprimir el árbol AST, sin embargo, la estructura actual no cumple con los requisitos especificados en las instrucciones del proyecto. 
+Se debe trabajar para que la salida del árbol refleje los niveles adecuados de indentación para representar las relaciones padre-hijo entre nodos. Esto mejorará la legibilidad del árbol impreso.
+
+Clase 9/11/23:
+
+Se realizaron avances en la funcionalidad semántica del compilador. 
+Se crearon las clases base para el chequeo semántico, incluyendo la clase Checker que hereda de Visitor para recorrer el AST, y la clase SymbolTable para llevar un registro de los símbolos y scopes. 
+También se agregaron métodos iniciales en la clase Checker para los nodos AST. Sin embargo, el código agregado aún no ha sido probado o depurado apropiadamente. 
+Se debe completar la implementación y comenzar con pruebas incrementales.
+
+Clase 11/11/23:
+
+Se finalizó la implementación inicial de la funcionalidad semántica, completando los métodos faltantes en la clase Checker para recorrer y analizar los distintos nodos del AST. 
+Además, se realizaron pruebas utilizando los ejercicios provistos en la carpeta de test3, validando que las reglas semánticas se aplican correctamente y se lanzen errores cuando corresponde.
+Se identificaron y corrigieron algunos errores durante las pruebas. Queda pendiente aumentar la cobertura de pruebas e identificar posibles casos borde que aún no estén contemplados apropiadamente.
