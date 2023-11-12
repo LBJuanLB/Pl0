@@ -69,6 +69,7 @@ class Checker(Visitor):
         
     def visit(self, n: Program, env: Symtab):
         # Crear un nuevo contexto (Symtab global)
+        
         Table = Symtab()
         # Visitar cada una de las declaraciones asociadas
         for funt in n.funlist:
@@ -89,11 +90,19 @@ class Checker(Visitor):
                 local.accept(self, Table)
         # Visitar StmtList
         if n.statements != None:
+           
             for stmt in n.statements:
+            
                 stmt.accept(self, Table)
+                print("hola")
+                print(type(stmt))
+                
                  # Determinar el datatype de la funcion (revisando instrucciones return)
                 if isinstance(stmt, Return):
                     datatype=stmt.datatype
+                    n.datatype=datatype
+                    print("holaaaa")
+                    print(datatype)
         return datatype
 
     def visit(self, n: Name, env: Symtab):
@@ -112,7 +121,7 @@ class Checker(Visitor):
         if node == None:
             raise TypeError(f'No se encuentra {n.name}')
         # Devuelvo el datatype
-        return node.datatype
+        return node.datatype.name
 
     def visit(self, n: TypeCast, env: Symtab):
         # Visitar la expresion asociada
@@ -120,21 +129,11 @@ class Checker(Visitor):
         # Devolver datatype asociado al nodo
         return n.datatype.name
     
-    def visit(self, n: Relation, env: Symtab):
-        # Visitar el hijo izquierdo (devuelve datatype)
-        izq = n.left.accept(self, env)
-        # Visitar el hijo derecho (devuelve datatype)
-        der = n.right.accept(self, env)
-        # Comparar ambos tipo de datatype
-        datatype=check_binary_op(n.op, izq, der)
-        if datatype == None:
-            raise TypeError(f'No se puede operar {izq} con {der}')
-        else:
-            return datatype
 
     def visit(self, n: FunCall, env: Symtab):
         # Buscar la funcion en Symtab (extraer: Tipo de retorno, el # de parametros)
         node = env.get(n.name)
+        print(node)
         #Tipo de retorno
         datatype=node.datatype
         #Num Parametros
@@ -150,10 +149,11 @@ class Checker(Visitor):
         # Comparar cada uno de los tipos de los argumentos con los parametros
         j=0
         for i in node.arguments:
-            if i.datatype != listdtype[j]:
+            if i.datatype.name != listdtype[j]:
                 raise TypeError(f'Argumento incorrecto')
             j+=1
         # Retornar el datatype de la funcion
+        print(datatype)
         return datatype
 
     def visit(self, n: Binary, env: Symtab):
@@ -167,7 +167,6 @@ class Checker(Visitor):
             raise TypeError(f'No se puede operar {izq} con {der}')
         else:
             n.datatype=datatype
-            env.add(n.name, n)
             return datatype
 
     def visit(self, n: Relation, env: Symtab):
@@ -176,12 +175,12 @@ class Checker(Visitor):
         # Visitar el hijo derecho (devuelve datatype)
         der=n.right.accept(self, env)
         # Comparar ambos tipo de datatype
+        
         datatype=check_binary_op(n.op, izq, der)
         if datatype == None:
             raise TypeError(f'No se puede operar {izq} con {der}')
         else:
             n.datatype=datatype
-            env.add(n.name, n)
             return datatype
 
     def visit(self, n: Unary, env: Symtab):
@@ -247,13 +246,11 @@ class Checker(Visitor):
             raise TypeError(f'Tipo incorrecto para la condición del If. Se esperaba "bool", pero se encontró "{condition_type}".')
 
         # Visitar las Stmts del then
-        for stmt in n.statement:
-            stmt.accept(self, env)
+        n.statement.accept(self, env)
 
         # Visitar las Stmts del else, si existen
         if n.if_else is not None:
-            for stmt in n.if_else:
-                stmt.accept(self, env)
+            n.if_else.accept(self, env)
         
 
     def visit(self, n: Return, env: Symtab):
@@ -261,7 +258,7 @@ class Checker(Visitor):
         expr_type = n.expr.accept(self, env)
         # Actualizar el datatype de la funcion
         n.datatype = expr_type
-        env.add(n.name, n)
+        print(env.parent.entries)
         return expr_type
             
 
@@ -272,4 +269,6 @@ class Checker(Visitor):
         # Visitar cada una de las instruciones asociadas
         for stmt in n.statements:
             stmt.accept(self, env)
+    
+
 

@@ -123,11 +123,11 @@ class Parser(sly.Parser):
 
     @_("INT")
     def expr(self, p):
-        return Integer(p[0],SimpleType("INT_T"))
+        return Integer(p[0],SimpleType("int"))
     
     @_("FLOAT")
     def expr(self, p):
-        return Float(p[0],SimpleType("FLOAT_T"))
+        return Float(p[0],SimpleType("float"))
 
     @_("INT_T '(' expr ')'",
        "FLOAT_T '(' expr ')'")
