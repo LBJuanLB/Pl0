@@ -143,19 +143,21 @@ class Checker(Visitor):
         if n.exprlist != None:
             for arg in n.exprlist:
                 listdtype.append(arg.accept(self, env))
-        else:
-            raise TypeError(f'Numero de argumentos incorrecto')
-        # Comparar el numero de argumentos con parametros
-        if NumParm != len(n.exprlist):
+
+        if n.exprlist == None:
             print(f'Numero de argumentos incorrecto')
-        # Comparar cada uno de los tipos de los argumentos con los parametros
-        j=0
-        for i in node.arguments:
-            if i.datatype.name != listdtype[j]:
-                print(f"El tipo de dato del para el parametro {i.name} es incorrecto. Tiene {listdtype[j]} y se esperaba {i.datatype.name}. En llamado de la funcion {n.name}")
-            j+=1
-        # Retornar el datatype de la funcion
-        return datatype
+        else:
+            # Comparar el numero de argumentos con parametros
+            if NumParm != len(n.exprlist):
+                print(f'Numero de argumentos incorrecto')
+            # Comparar cada uno de los tipos de los argumentos con los parametros
+            j=0
+            for i in node.arguments:
+                if i.datatype.name != listdtype[j]:
+                    print(f"El tipo de dato del para el parametro {i.name} es incorrecto. Tiene {listdtype[j]} y se esperaba {i.datatype.name}. En llamado de la funcion {n.name}")
+                j+=1
+            # Retornar el datatype de la funcion
+            return datatype
 
     def visit(self, n: Binary, env: Symtab):
         # Visitar el hijo izquierdo (devuelve datatype)
