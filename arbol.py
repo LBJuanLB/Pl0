@@ -144,7 +144,7 @@ class Argument(Declaration):
 
 @dataclass
 class TypeCast(Expression):
-    dataType: DataType
+    datatype: DataType
     expr: Expression 
 
 @dataclass
