@@ -1,5 +1,6 @@
 from arbol import *
 from typesys import *
+
 # ---------------------------------------------------------------------
 #  Tabla de Simbolos
 # ---------------------------------------------------------------------
@@ -62,6 +63,9 @@ class Symtab:
         return None
 
 class Checker(Visitor):
+    def __init__(self):
+        self.whileBool=False
+        self.Lineno=0
     @classmethod
     def checker(cls, n:node):
         c=cls()
@@ -84,25 +88,22 @@ class Checker(Visitor):
         if n.arguments != None:
             for arg in n.arguments:
                 arg.accept(self, Table)
+            
         # Visitar VarList
         if n.locals != None:
             for local in n.locals:
-                local.accept(self, Table)
-        # Visitar StmtList
-        if n.statements != None:
-           
-            for stmt in n.statements:
-            
-                stmt.accept(self, Table)
-                print("hola")
-                print(type(stmt))
                 
+                local.accept(self, Table)
+            
+        # Visitar StmtList
+        datatype=None  
+        if n.statements != None:
+            for stmt in n.statements:
+                stmt.accept(self, Table)
                  # Determinar el datatype de la funcion (revisando instrucciones return)
                 if isinstance(stmt, Return):
                     datatype=stmt.datatype
                     n.datatype=datatype
-                    print("holaaaa")
-                    print(datatype)
         return datatype
 
     def visit(self, n: Name, env: Symtab):
@@ -127,13 +128,12 @@ class Checker(Visitor):
         # Visitar la expresion asociada
         n.expr.accept(self, env)
         # Devolver datatype asociado al nodo
-        return n.datatype.name
+        return n.datatype
     
 
     def visit(self, n: FunCall, env: Symtab):
         # Buscar la funcion en Symtab (extraer: Tipo de retorno, el # de parametros)
         node = env.get(n.name)
-        print(node)
         #Tipo de retorno
         datatype=node.datatype
         #Num Parametros
@@ -143,17 +143,18 @@ class Checker(Visitor):
         if n.exprlist != None:
             for arg in n.exprlist:
                 listdtype.append(arg.accept(self, env))
+        else:
+            raise TypeError(f'Numero de argumentos incorrecto')
         # Comparar el numero de argumentos con parametros
         if NumParm != len(n.exprlist):
-            raise TypeError(f'Numero de argumentos incorrecto')
+            print(f'Numero de argumentos incorrecto')
         # Comparar cada uno de los tipos de los argumentos con los parametros
         j=0
         for i in node.arguments:
             if i.datatype.name != listdtype[j]:
-                raise TypeError(f'Argumento incorrecto')
+                print(f"El tipo de dato del para el parametro {i.name} es incorrecto. Tiene {listdtype[j]} y se esperaba {i.datatype.name}. En llamado de la funcion {n.name}")
             j+=1
         # Retornar el datatype de la funcion
-        print(datatype)
         return datatype
 
     def visit(self, n: Binary, env: Symtab):
@@ -192,7 +193,6 @@ class Checker(Visitor):
             raise TypeError(f'No se puede operar {data_type_expr}')
         else:
             n.datatype=datatype
-            env.add(n.name, n)
             return datatype
 
     def visit(self, n: Argument, env: Symtab):
@@ -212,32 +212,27 @@ class Checker(Visitor):
             return nodo.datatype
     def visit(self, n: Read, env: Symtab):
         # Buscar la Variable en Symtab
-        nodo=env.get(n.expr.name)
+        nodo=env.get(n.local.name)
         if nodo == None:
-            raise TypeError(f'No se encuentra {n.expr.name}')
+            raise TypeError(f'No se encuentra {n.local.name}')
         else:
-            return nodo.datatype
+            return nodo.datatype.name
 
     def visit(self, n: While, env: Symtab):
+        self.whileBool=True
         # Visitar la condicion del While (Comprobar tipo bool)
         condition_type = n.relation.accept(self, env)
         if condition_type != 'bool':
             raise TypeError(f'Tipo incorrecto para la condición del While. Se esperaba "bool", pero se encontró "{condition_type}".')
 
         # Visitar las Stmts
-        for stmt in n.statement:
-            stmt.accept(self, env)
-        
+        n.statement.accept(self, env)
+        self.whileBool=False
 
     def visit(self, n: Break, env: Symtab):
         # Esta dentro de un While?
-        current_env = env
-        while current_env is not None:
-            if isinstance(current_env, While):
-                return True
-                
-        #current_env = current_env.parent
-        raise ValueError('La instrucción "Break" debe estar dentro de un bucle "While".')
+        if self.whileBool == False:
+            raise ValueError('La instrucción "Break" debe estar dentro de un bucle "While".')
 
     def visit(self, n: If, env: Symtab):
         # Visitar la condicion del IfStmt (Comprobar tipo bool)
@@ -255,10 +250,13 @@ class Checker(Visitor):
 
     def visit(self, n: Return, env: Symtab):
         # Visitar la expresion asociada
+        padre=list(env.parent.entries.keys())
+        nombre_funcion=padre[len(padre)-1] #Nombre de la funcion
+        nodo_funcion=env.get(nombre_funcion)
         expr_type = n.expr.accept(self, env)
         # Actualizar el datatype de la funcion
+        nodo_funcion.datatype=expr_type
         n.datatype = expr_type
-        print(env.parent.entries)
         return expr_type
             
 
@@ -269,6 +267,21 @@ class Checker(Visitor):
         # Visitar cada una de las instruciones asociadas
         for stmt in n.statements:
             stmt.accept(self, env)
+
+    def visit(self, n: Assing, env:Symtab):
+        # Buscar la Variable en Symtab
+        nodo=env.get(n.location.name)
+        if nodo == None:
+            raise TypeError(f'No se encuentra {n.location.name}')
+        else:
+            # Visitar la expresion asociada
+            expr_type = n.expr.accept(self, env)
+            # Actualizar el datatype de la variable
+            dataType= check_binary_op('+', nodo.datatype.name, expr_type)
+            if dataType == None:
+                raise TypeError(f'No se puede asignar {expr_type} a {nodo.datatype.name}')
+            else:
+                return dataType
     
 
 
