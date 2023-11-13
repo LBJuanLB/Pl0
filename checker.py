@@ -65,7 +65,8 @@ class Symtab:
 class Checker(Visitor):
     def __init__(self):
         self.whileBool=False
-        self.Lineno=0
+        self.error=False
+        self.funcall=False
     @classmethod
     def checker(cls, n:node):
         c=cls()
@@ -78,6 +79,7 @@ class Checker(Visitor):
         # Visitar cada una de las declaraciones asociadas
         for funt in n.funlist:
             funt.accept(self, Table)
+        return self.error
 
     def visit(self, n: Function, env: Symtab):
         # Agregar el nombre de la funcion a Symtab
@@ -98,19 +100,22 @@ class Checker(Visitor):
         # Visitar StmtList
         datatype=None  
         if n.statements != None:
+            
             for stmt in n.statements:
                 stmt.accept(self, Table)
                  # Determinar el datatype de la funcion (revisando instrucciones return)
                 if isinstance(stmt, Return):
                     datatype=stmt.datatype
                     n.datatype=datatype
+            
         return datatype
 
     def visit(self, n: Name, env: Symtab):
         # Buscar el nombre en Symtab
         nombre=env.get(n.name)
         if nombre == None:
-            raise TypeError(f'No se encuentra {n.name}')
+            print(f'No se encuentra {n.name}')
+            self.error=True
 
     def visit(self, n: Literal, env: Symtab):
         # Devolver datatype
@@ -120,7 +125,21 @@ class Checker(Visitor):
         # Buscar en Symtab y extraer datatype (No se encuentra?)
         node = env.get(n.name)
         if node == None:
-            raise TypeError(f'No se encuentra {n.name}')
+            print(f'No se encuentra {n.name}')
+            self.error=True
+        elif isinstance(n, ArrayLocation):
+            dattype=n.expr.accept(self, env)
+            if dattype != 'int':
+                print(f'El indice del array {n.name} no es un entero')
+                self.error=True
+            if isinstance(node.datatype, SimpleType) and self.funcall==False :
+                print(f' {n.name} es una variable, no un array')
+                self.error=True 
+        elif isinstance(n, SimpleLocation) :
+            if isinstance(node.datatype, ArrayType)and self.funcall==False:
+                print(f' {n.name} es un array, no una variable')   
+                self.error=True
+          
         # Devuelvo el datatype
         return node.datatype.name
 
@@ -132,6 +151,7 @@ class Checker(Visitor):
     
 
     def visit(self, n: FunCall, env: Symtab):
+        self.funcall=True
         # Buscar la funcion en Symtab (extraer: Tipo de retorno, el # de parametros)
         node = env.get(n.name)
         #Tipo de retorno
@@ -140,36 +160,71 @@ class Checker(Visitor):
         NumParm=len(node.arguments)   
         # Visitar la lista de Argumentos
         listdtype=[]
+        listargument=[]
+        listantype=[]
         if n.exprlist != None:
             for arg in n.exprlist:
                 listdtype.append(arg.accept(self, env))
+                if  isinstance(arg, SimpleLocation) or  isinstance(arg,ArrayLocation):
+                    # Buscar la Variable en Symtab
+                    nodo=env.get(arg.name)
+                    if isinstance(nodo.datatype, ArrayType):
+                        listargument.append(nodo.datatype.expr.value)
+                    else:
+                        listargument.append(None) 
+                    listantype.append(arg)
+                        
 
         if n.exprlist == None:
             print(f'Numero de argumentos incorrecto')
+            self.error=True
         else:
             # Comparar el numero de argumentos con parametros
             if NumParm != len(n.exprlist):
                 print(f'Numero de argumentos incorrecto')
-            # Comparar cada uno de los tipos de los argumentos con los parametros
-            j=0
-            for i in node.arguments:
-                if i.datatype.name != listdtype[j]:
-                    print(f"El tipo de dato del para el parametro {i.name} es incorrecto. Tiene {listdtype[j]} y se esperaba {i.datatype.name}. En llamado de la funcion {n.name}")
-                j+=1
-            # Retornar el datatype de la funcion
-            return datatype
+                self.error=True
+            else:
+                # Comparar cada uno de los tipos de los argumentos con los parametros
+                j=0
+                for i in node.arguments:
+                    if i.datatype.name != listdtype[j]:
+                        print(f"El tipo de dato del para el parametro {i.name} es incorrecto. Tiene {listdtype[j]} y se esperaba {i.datatype.name}. En llamado de la funcion {n.name}")
+                        self.error=True
+                    if isinstance(i.datatype, ArrayType) :
+                        if i.datatype.expr.value != listargument[j]:
+                            if listargument[j] == None:
+                                print(f"En el parametro  {i.name} no se le ingreso un tipo de dato array")
+                            else:
+                                print(f"El Tamaño del Array para el parametro  {i.name} es incorrecto. Envia un tamaño de {listargument[j]} y se esperaba {i.datatype.expr.value}. En llamado de la funcion {n.name}")
+                            self.error=True
+                        elif  isinstance(listantype[j], ArrayLocation):
+                            print(f"El parametro {i.name} es un array. No le esta enviando un array")
+                            self.error=True
+                    elif isinstance(i.datatype, SimpleType) :
+                        if listargument!=[]: 
+                            if listargument[j] != None and isinstance(listantype[j], SimpleLocation):
+                                print(f"El parametro {i.name} es una variable. No le esta enviando una variable")
+                                self.error=True
+                       
+                    j+=1
+                self.funcall=False
+                # Retornar el datatype de la funcion
+                return datatype
 
     def visit(self, n: Binary, env: Symtab):
+   
         # Visitar el hijo izquierdo (devuelve datatype)
         izq = n.left.accept(self, env)
         # Visitar el hijo derecho (devuelve datatype)
         der = n.right.accept(self, env)
         # Comparar ambos tipo de datatype
         datatype=check_binary_op(n.op, izq, der)
+        
         if datatype == None:
-            raise TypeError(f'No se puede operar {izq} con {der}')
+            print(f'No se puede operar {izq} con {der}')
+            self.error=True
         else:
-            n.datatype=datatype
+            n.datatype=SimpleType(datatype)
             return datatype
 
     def visit(self, n: Relation, env: Symtab):
@@ -181,7 +236,8 @@ class Checker(Visitor):
         
         datatype=check_binary_op(n.op, izq, der)
         if datatype == None:
-            raise TypeError(f'No se puede operar {izq} con {der}')
+            print(f'No se puede operar {izq} con {der}')
+            self.error=True
         else:
             n.datatype=datatype
             return datatype
@@ -192,7 +248,8 @@ class Checker(Visitor):
         # Comparar datatype
         datatype=check_unary_op(n.op, data_type_expr)
         if datatype == None:
-            raise TypeError(f'No se puede operar {data_type_expr}')
+            print(f'No se puede operar {data_type_expr}')
+            self.error=True
         else:
             n.datatype=datatype
             return datatype
@@ -206,17 +263,21 @@ class Checker(Visitor):
         ...     
 
     def visit(self, n: Write, env: Symtab):
+        n.expr.accept(self, env)
         # Buscar la Variable en Symtab
         nodo=env.get(n.expr.name)
         if nodo == None:
-            raise TypeError(f'No se encuentra {n.expr.name}')
+            print(f'No se encuentra {n.expr.name}')
+            self.error=True
         else:
             return nodo.datatype
     def visit(self, n: Read, env: Symtab):
+        n.local.accept(self, env)
         # Buscar la Variable en Symtab
         nodo=env.get(n.local.name)
         if nodo == None:
-            raise TypeError(f'No se encuentra {n.local.name}')
+            print(f'No se encuentra {n.local.name}')
+            self.error=True
         else:
             return nodo.datatype.name
 
@@ -225,8 +286,8 @@ class Checker(Visitor):
         # Visitar la condicion del While (Comprobar tipo bool)
         condition_type = n.relation.accept(self, env)
         if condition_type != 'bool':
-            raise TypeError(f'Tipo incorrecto para la condición del While. Se esperaba "bool", pero se encontró "{condition_type}".')
-
+            print(f'Tipo incorrecto para la condición del While. Se esperaba "bool", pero se encontró "{condition_type}".')
+            self.error=True
         # Visitar las Stmts
         n.statement.accept(self, env)
         self.whileBool=False
@@ -234,14 +295,15 @@ class Checker(Visitor):
     def visit(self, n: Break, env: Symtab):
         # Esta dentro de un While?
         if self.whileBool == False:
-            raise ValueError('La instrucción "Break" debe estar dentro de un bucle "While".')
+            print('La instrucción "Break" debe estar dentro de un bucle "While".')
+            self.error=True
 
     def visit(self, n: If, env: Symtab):
         # Visitar la condicion del IfStmt (Comprobar tipo bool)
         condition_type = n.relation.accept(self, env)
         if condition_type != 'bool':
-            raise TypeError(f'Tipo incorrecto para la condición del If. Se esperaba "bool", pero se encontró "{condition_type}".')
-
+            print(f'Tipo incorrecto para la condición del If. Se esperaba "bool", pero se encontró "{condition_type}".')
+            self.error=True
         # Visitar las Stmts del then
         n.statement.accept(self, env)
 
@@ -273,15 +335,32 @@ class Checker(Visitor):
     def visit(self, n: Assing, env:Symtab):
         # Buscar la Variable en Symtab
         nodo=env.get(n.location.name)
+        
+        #print (n.expr)
+        #print(nodo)
+        #print("------------------")
         if nodo == None:
-            raise TypeError(f'No se encuentra {n.location.name}')
+            print(f'No se encuentra {n.location.name}')
+            self.error=True
         else:
             # Visitar la expresion asociada
             expr_type = n.expr.accept(self, env)
             # Actualizar el datatype de la variable
             dataType= check_binary_op('+', nodo.datatype.name, expr_type)
             if dataType == None:
-                raise TypeError(f'No se puede asignar {expr_type} a {nodo.datatype.name}')
+                print(f'No se puede asignar {expr_type} a {nodo.datatype.name}')
+                self.error=True
+            elif isinstance(nodo.datatype, ArrayType):
+                if isinstance(n.location, SimpleLocation):
+                    print(f'{n.location.name} es de tipo array, no se le puede asignar un valor a un array  ')
+                    self.error=True
+                elif isinstance(n.location, ArrayLocation):
+                    if isinstance(n.location.expr, Unary):
+                        if n.location.expr.op== '-':
+                            print(f'El indice del array {n.location.name} no puede ser negativo  ')
+                            self.error=True
+                     
+                
             else:
                 return dataType
     

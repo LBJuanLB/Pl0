@@ -354,10 +354,11 @@ def main(argv):
     
     lex = Lexer()
     pas = Parser()
+    check=Checker()
     
     txt = open(argv[1]).read()
     ast = pas.parse(lex.tokenize(txt))
-    Checker.checker(ast)
+    error=check.checker(ast)
     '''
     for tok in lex.tokenize(txt):
         #value=tok.value if isinstance(tok.value , str(tok.value))
@@ -373,11 +374,14 @@ def main(argv):
     console = Console()
     console.print(table)
     '''
-    #Imprimir AST en consola
-    print_ast(ast)
-    #Imprimir AST en Graphviz
-    with open('graph.dot','w') as archivo:
-        archivo.write(str(Dot.render(ast)))
+    if error:
+        ...
+    else:
+        #Imprimir AST en consola
+        print_ast(ast)
+        #Imprimir AST en Graphviz
+        with open('graph.dot','w') as archivo:
+            archivo.write(str(Dot.render(ast)))
     
 def print_ast(node, indent=0):
 
