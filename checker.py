@@ -47,7 +47,8 @@ class Symtab:
         o FuncDeclaration)
         '''
         if name in self.entries:
-            raise Symtab.SymbolDefinedError()
+            return True
+            
         self.entries[name] = value
 
     def get(self, name):
@@ -83,7 +84,9 @@ class Checker(Visitor):
 
     def visit(self, n: Function, env: Symtab):
         # Agregar el nombre de la funcion a Symtab
-        env.add(n.name, n)
+        if env.add(n.name, n):
+            print(f'La funcion {n.name} ya esta declarada')
+            self.error=True
         # Crear un nuevo contexto (Symtab)
         Table = Symtab(env)
         # Visitar ParamList
@@ -132,16 +135,22 @@ class Checker(Visitor):
             if dattype != 'int':
                 print(f'El indice del array {n.name} no es un entero')
                 self.error=True
+            else:
+                return node.datatype.name
             if isinstance(node.datatype, SimpleType) and self.funcall==False :
                 print(f' {n.name} es una variable, no un array')
                 self.error=True 
+            else:
+                return node.datatype.name
         elif isinstance(n, SimpleLocation) :
             if isinstance(node.datatype, ArrayType)and self.funcall==False:
                 print(f' {n.name} es un array, no una variable')   
                 self.error=True
-          
-        # Devuelvo el datatype
-        return node.datatype.name
+            else:
+                return node.datatype.name
+        else: 
+            # Devuelvo el datatype
+            return node.datatype.name
 
     def visit(self, n: TypeCast, env: Symtab):
         # Visitar la expresion asociada
@@ -155,61 +164,67 @@ class Checker(Visitor):
         # Buscar la funcion en Symtab (extraer: Tipo de retorno, el # de parametros)
         node = env.get(n.name)
         #Tipo de retorno
-        datatype=node.datatype
-        #Num Parametros
-        NumParm=len(node.arguments)   
-        # Visitar la lista de Argumentos
-        listdtype=[]
-        listargument=[]
-        listantype=[]
-        if n.exprlist != None:
-            for arg in n.exprlist:
-                listdtype.append(arg.accept(self, env))
-                if  isinstance(arg, SimpleLocation) or  isinstance(arg,ArrayLocation):
-                    # Buscar la Variable en Symtab
-                    nodo=env.get(arg.name)
-                    if isinstance(nodo.datatype, ArrayType):
-                        listargument.append(nodo.datatype.expr.value)
-                    else:
-                        listargument.append(None) 
-                    listantype.append(arg)
-                        
-
-        if n.exprlist == None:
-            print(f'Numero de argumentos incorrecto')
-            self.error=True
+        if node == None:
+            print(f'No se encuentra  {n.name}  declarada o esta declarada de forma local en otra funcion ')
+            self.error=True 
+        elif not isinstance(node, Function):
+            print(f'{n.name} no es una funcion')
         else:
-            # Comparar el numero de argumentos con parametros
-            if NumParm != len(n.exprlist):
+            datatype=node.datatype
+            #Num Parametros
+            NumParm=len(node.arguments)   
+            # Visitar la lista de Argumentos
+            listdtype=[]
+            listargument=[]
+            listantype=[]
+            if n.exprlist != None:
+                for arg in n.exprlist:
+                    listdtype.append(arg.accept(self, env))
+                    if  isinstance(arg, SimpleLocation) or  isinstance(arg,ArrayLocation):
+                        # Buscar la Variable en Symtab
+                        nodo=env.get(arg.name)
+                        if isinstance(nodo.datatype, ArrayType):
+                            listargument.append(nodo.datatype.expr.value)
+                        else:
+                            listargument.append(None) 
+                        listantype.append(arg)
+                            
+
+            if n.exprlist == None:
                 print(f'Numero de argumentos incorrecto')
                 self.error=True
             else:
-                # Comparar cada uno de los tipos de los argumentos con los parametros
-                j=0
-                for i in node.arguments:
-                    if i.datatype.name != listdtype[j]:
-                        print(f"El tipo de dato del para el parametro {i.name} es incorrecto. Tiene {listdtype[j]} y se esperaba {i.datatype.name}. En llamado de la funcion {n.name}")
-                        self.error=True
-                    if isinstance(i.datatype, ArrayType) :
-                        if i.datatype.expr.value != listargument[j]:
-                            if listargument[j] == None:
-                                print(f"En el parametro  {i.name} no se le ingreso un tipo de dato array")
-                            else:
-                                print(f"El Tamaño del Array para el parametro  {i.name} es incorrecto. Envia un tamaño de {listargument[j]} y se esperaba {i.datatype.expr.value}. En llamado de la funcion {n.name}")
+                # Comparar el numero de argumentos con parametros
+                if NumParm != len(n.exprlist):
+                    print(f'Numero de argumentos incorrecto')
+                    self.error=True
+                else:
+                    # Comparar cada uno de los tipos de los argumentos con los parametros
+                    j=0
+                    for i in node.arguments:
+                        if i.datatype.name != listdtype[j]:
+                            print(f"El tipo de dato del para el parametro {i.name} es incorrecto. Tiene {listdtype[j]} y se esperaba {i.datatype.name}. En llamado de la funcion {n.name}")
                             self.error=True
-                        elif  isinstance(listantype[j], ArrayLocation):
-                            print(f"El parametro {i.name} es un array. No le esta enviando un array")
-                            self.error=True
-                    elif isinstance(i.datatype, SimpleType) :
-                        if listargument!=[]: 
-                            if listargument[j] != None and isinstance(listantype[j], SimpleLocation):
-                                print(f"El parametro {i.name} es una variable. No le esta enviando una variable")
+                        if isinstance(i.datatype, ArrayType) :
+                            if i.datatype.expr.value != listargument[j]:
+                                if listargument[j] == None:
+                                    print(f"En el parametro  {i.name} no se le ingreso un tipo de dato array")
+                                else:
+                                    print(f"El Tamaño del Array para el parametro  {i.name} es incorrecto. Envia un tamaño de {listargument[j]} y se esperaba {i.datatype.expr.value}. En llamado de la funcion {n.name}")
                                 self.error=True
-                       
-                    j+=1
-                self.funcall=False
-                # Retornar el datatype de la funcion
-                return datatype
+                            elif  isinstance(listantype[j], ArrayLocation):
+                                print(f"El parametro {i.name} es un array. No le esta enviando un array")
+                                self.error=True
+                        elif isinstance(i.datatype, SimpleType) :
+                            if listargument!=[]: 
+                                if listargument[j] != None and isinstance(listantype[j], SimpleLocation):
+                                    print(f"El parametro {i.name} es una variable. No le esta enviando una variable")
+                                    self.error=True
+                        
+                        j+=1
+                    self.funcall=False
+                    # Retornar el datatype de la funcion
+                    return datatype
 
     def visit(self, n: Binary, env: Symtab):
    
@@ -219,7 +234,6 @@ class Checker(Visitor):
         der = n.right.accept(self, env)
         # Comparar ambos tipo de datatype
         datatype=check_binary_op(n.op, izq, der)
-        
         if datatype == None:
             print(f'No se puede operar {izq} con {der}')
             self.error=True
@@ -256,8 +270,11 @@ class Checker(Visitor):
 
     def visit(self, n: Argument, env: Symtab):
         # Agregar el nombre del parametro a Symtab
-        env.add(n.name, n)
-        return n.datatype
+        if env.add(n.name, n):
+            print(f'El parametro {n.name} ya esta declarado')
+            self.error=True
+        else:
+            return n.datatype
 
     def visit(self, n: Print, env: Symtab):
         ...     
@@ -268,6 +285,9 @@ class Checker(Visitor):
         nodo=env.get(n.expr.name)
         if nodo == None:
             print(f'No se encuentra {n.expr.name}')
+            self.error=True
+        elif  nodo.datatype==None:
+            print(f'Tipo de retorno desconocido de {n.expr.name} ')
             self.error=True
         else:
             return nodo.datatype
