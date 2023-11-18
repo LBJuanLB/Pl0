@@ -64,6 +64,14 @@ class Symtab:
             return self.parent.get(name)
         return None
 
+    def print_symbol_table(self):
+        for name, value in self.entries.items():
+            print(f"#  {name}: {value}")
+            print("#---------------------------------------------------------------------")
+        for child in self.children:
+            child.print_symbol_table()
+
+
 class Checker(Visitor):
     def __init__(self,context):
         self.context=context
@@ -71,6 +79,7 @@ class Checker(Visitor):
         self.context.have_errors = False
         self.whileBool=False
         self.funcall=False
+        self.symtab=Symtab()
     @classmethod
     def checker(cls, n:node, context:Context):
         c=cls(context)
@@ -82,10 +91,12 @@ class Checker(Visitor):
         # Visitar cada una de las declaraciones asociadas
         for funt in n.funlist:
             funt.accept(self, Table)
+        self.symtab=Table
         if(Table.get('main') == None):
             self.context.error('No se encuentra la funcion main', 0)
             self.context.have_errors=True
-        return self.context.have_errors
+        return Table
+        
 
     def visit(self, n: Function, env: Symtab):
         # Agregar el nombre de la funcion a Symtab

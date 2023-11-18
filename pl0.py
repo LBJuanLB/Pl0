@@ -128,6 +128,24 @@ if __name__ == '__main__':
     if context.have_errors == False:
       print("No hay errores!")
 
+  elif args.sym:
+    context.parse(source)
+    checker = Checker(context)
+    checker.symtab=checker.checker(context.ast,context)
+    if context.have_errors == False:
+      flex = fname.split('.')[0] + '.sym'
+      print(f'print symbol table: {flex}')
+      with open(flex, 'w', encoding='utf-8') as f:
+        with redirect_stdout(f):
+          print("# ---------------------------------------------------------------------")
+          print("#  Tabla de Simbolos")
+          print("# ---------------------------------------------------------------------")
+          print("#  Nombre | Nodo  ")
+          print("# ---------------------------------------------------------------------")
+          checker.symtab.print_symbol_table()
+    else:
+      print("Hay errores en el programa, no se puede generar la tabla de simbolos")
+
   else:
 
     try:

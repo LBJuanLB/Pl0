@@ -1,0 +1,15 @@
+# ---------------------------------------------------------------------
+#  Tabla de Simbolos
+# ---------------------------------------------------------------------
+#  Nombre | Nodo  
+# ---------------------------------------------------------------------
+#  fact: Function(name='fact', arguments=[Argument(name='n', datatype=SimpleType(name='int'))], locals=None, statements=[If(relation=Relation(op='==', left=SimpleLocation(name='n'), right=Integer(value=1, datatype=SimpleType(name='int')), datatype='bool'), statement=Return(expr=Integer(value=1, datatype=SimpleType(name='int')), datatype='int'), if_else=Return(expr=Binary(op='*', left=SimpleLocation(name='n'), right=FunCall(name='fact', exprlist=[Binary(op='-', left=SimpleLocation(name='n'), right=Integer(value=1, datatype=SimpleType(name='int')), datatype=SimpleType(name='int'))]), datatype=SimpleType(name='int')), datatype='int'))], datatype='int')
+#---------------------------------------------------------------------
+#  main: Function(name='main', arguments=None, locals=[Argument(name='x', datatype=SimpleType(name='int')), Argument(name='r', datatype=SimpleType(name='int'))], statements=[Print(string='"Entre un numero\\n"'), Read(local=SimpleLocation(name='x')), Assing(location=SimpleLocation(name='r'), expr=FunCall(name='fact', exprlist=[SimpleLocation(name='x')])), Write(expr=SimpleLocation(name='r'))], datatype=None)
+#---------------------------------------------------------------------
+#  n: Argument(name='n', datatype=SimpleType(name='int'))
+#---------------------------------------------------------------------
+#  x: Argument(name='x', datatype=SimpleType(name='int'))
+#---------------------------------------------------------------------
+#  r: Argument(name='r', datatype=SimpleType(name='int'))
+#---------------------------------------------------------------------
