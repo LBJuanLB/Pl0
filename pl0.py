@@ -137,11 +137,6 @@ if __name__ == '__main__':
       print(f'print symbol table: {flex}')
       with open(flex, 'w', encoding='utf-8') as f:
         with redirect_stdout(f):
-          print("# ---------------------------------------------------------------------")
-          print("#  Tabla de Simbolos")
-          print("# ---------------------------------------------------------------------")
-          print("#  Nombre | Nodo  ")
-          print("# ---------------------------------------------------------------------")
           checker.symtab.print_symbol_table()
     else:
       print("Hay errores en el programa, no se puede generar la tabla de simbolos")
