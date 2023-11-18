@@ -1,5 +1,6 @@
 from arbol import *
 from typesys import *
+from context import *
 
 # ---------------------------------------------------------------------
 #  Tabla de Simbolos
@@ -64,29 +65,33 @@ class Symtab:
         return None
 
 class Checker(Visitor):
-    def __init__(self):
+    def __init__(self,context):
+        self.context=context
+        self.error = context.error
+        self.context.have_errors = False
         self.whileBool=False
-        self.error=False
         self.funcall=False
     @classmethod
-    def checker(cls, n:node):
-        c=cls()
+    def checker(cls, n:node, context:Context):
+        c=cls(context)
         return n.accept(c, Symtab())
         
     def visit(self, n: Program, env: Symtab):
         # Crear un nuevo contexto (Symtab global)
-        
         Table = Symtab()
         # Visitar cada una de las declaraciones asociadas
         for funt in n.funlist:
             funt.accept(self, Table)
-        return self.error
+        if(Table.get('main') == None):
+            self.context.error('No se encuentra la funcion main', 0)
+            self.context.have_errors=True
+        return self.context.have_errors
 
     def visit(self, n: Function, env: Symtab):
         # Agregar el nombre de la funcion a Symtab
         if env.add(n.name, n):
-            print(f'La funcion {n.name} ya esta declarada')
-            self.error=True
+            self.context.error(f'La funcion {n.name} ya esta declarada', n)
+            self.context.have_errors=True
         # Crear un nuevo contexto (Symtab)
         Table = Symtab(env)
         # Visitar ParamList
@@ -117,8 +122,8 @@ class Checker(Visitor):
         # Buscar el nombre en Symtab
         nombre=env.get(n.name)
         if nombre == None:
-            print(f'No se encuentra {n.name}')
-            self.error=True
+            self.context.error(f'No se encuentra {n.name}',n)
+            self.context.have_errors=True
 
     def visit(self, n: Literal, env: Symtab):
         # Devolver datatype
@@ -128,24 +133,26 @@ class Checker(Visitor):
         # Buscar en Symtab y extraer datatype (No se encuentra?)
         node = env.get(n.name)
         if node == None:
-            print(f'No se encuentra {n.name}')
-            self.error=True
+            self.context.error(f'No se encuentra {n.name}',n)
+            self.context.have_errors=True
         elif isinstance(n, ArrayLocation):
+            errors=False
             dattype=n.expr.accept(self, env)
             if dattype != 'int':
-                print(f'El indice del array {n.name} no es un entero')
-                self.error=True
-            else:
-                return node.datatype.name
+                self.context.error(f'El indice del array {n.name} no es un entero',n)
+                self.context.have_errors=True
+                errors=True
+
             if isinstance(node.datatype, SimpleType) and self.funcall==False :
-                print(f' {n.name} es una variable, no un array')
-                self.error=True 
-            else:
+                self.context.error(f' {n.name} es una variable, no un array',n)
+                self.context.have_errors=True
+                errors=True
+            if errors==False:
                 return node.datatype.name
         elif isinstance(n, SimpleLocation) :
             if isinstance(node.datatype, ArrayType)and self.funcall==False:
-                print(f' {n.name} es un array, no una variable')   
-                self.error=True
+                self.context.error(f' {n.name} es un array, no una variable',n)   
+                self.context.have_errors=True
             else:
                 return node.datatype.name
         else: 
@@ -165,10 +172,10 @@ class Checker(Visitor):
         node = env.get(n.name)
         #Tipo de retorno
         if node == None:
-            print(f'No se encuentra  {n.name}  declarada o esta declarada de forma local en otra funcion ')
-            self.error=True 
+            self.context.error(f'No se encuentra  {n.name}  declarada o esta declarada de forma local en otra funcion ',n)
+            self.context.have_errors=True 
         elif not isinstance(node, Function):
-            print(f'{n.name} no es una funcion')
+            self.context.error(f'{n.name} no es una funcion',n)
         else:
             datatype=node.datatype
             #Num Parametros
@@ -188,39 +195,40 @@ class Checker(Visitor):
                         else:
                             listargument.append(None) 
                         listantype.append(arg)
-                            
-
+                    else:
+                        listargument.append(None) 
+                        listantype.append(arg)
             if n.exprlist == None:
-                print(f'Numero de argumentos incorrecto')
-                self.error=True
+                self.context.error(f'Numero de argumentos incorrecto',n)
+                self.context.have_errors=True
             else:
                 # Comparar el numero de argumentos con parametros
                 if NumParm != len(n.exprlist):
-                    print(f'Numero de argumentos incorrecto')
-                    self.error=True
+                    self.context.error(f'Numero de argumentos incorrecto',n)
+                    self.context.have_errors=True
                 else:
                     # Comparar cada uno de los tipos de los argumentos con los parametros
                     j=0
                     for i in node.arguments:
                         if i.datatype.name != listdtype[j]:
-                            print(f"El tipo de dato del para el parametro {i.name} es incorrecto. Tiene {listdtype[j]} y se esperaba {i.datatype.name}. En llamado de la funcion {n.name}")
-                            self.error=True
+                            self.context.error(f'El tipo de dato del para el parametro {i.name} es incorrecto. Tiene {listdtype[j]} y se esperaba {i.datatype.name}. En llamado de la funcion {n.name}', n)
+                            self.context.have_errors=True
+                            
                         if isinstance(i.datatype, ArrayType) :
                             if i.datatype.expr.value != listargument[j]:
                                 if listargument[j] == None:
-                                    print(f"En el parametro  {i.name} no se le ingreso un tipo de dato array")
+                                    self.context.error(f"En el parametro  {i.name} no se le ingreso un tipo de dato array",n)
                                 else:
-                                    print(f"El Tamaño del Array para el parametro  {i.name} es incorrecto. Envia un tamaño de {listargument[j]} y se esperaba {i.datatype.expr.value}. En llamado de la funcion {n.name}")
-                                self.error=True
+                                    self.context.error(f"El Tamaño del Array para el parametro  {i.name} es incorrecto. Envia un tamaño de {listargument[j]} y se esperaba {i.datatype.expr.value}. En llamado de la funcion {n.name}",n)
+                                self.context.have_errors=True
                             elif  isinstance(listantype[j], ArrayLocation):
-                                print(f"El parametro {i.name} es un array. No le esta enviando un array")
-                                self.error=True
-                        elif isinstance(i.datatype, SimpleType) :
-                            if listargument!=[]: 
+                                self.context.error(f"El parametro {i.name} es un array. No le esta enviando un array",n)
+                                self.context.have_errors=True
+                        elif isinstance(i.datatype, SimpleType):
+                            if len(listargument) !=0:
                                 if listargument[j] != None and isinstance(listantype[j], SimpleLocation):
-                                    print(f"El parametro {i.name} es una variable. No le esta enviando una variable")
-                                    self.error=True
-                        
+                                    self.context.error(f"El parametro {i.name} es una variable. No le esta enviando una variable",n)
+                                    self.context.have_errors=True
                         j+=1
                     self.funcall=False
                     # Retornar el datatype de la funcion
@@ -235,8 +243,8 @@ class Checker(Visitor):
         # Comparar ambos tipo de datatype
         datatype=check_binary_op(n.op, izq, der)
         if datatype == None:
-            print(f'No se puede operar {izq} con {der}')
-            self.error=True
+            self.context.error(f'No se puede operar {izq} con {der}',n)
+            self.context.have_errors=True
         else:
             n.datatype=SimpleType(datatype)
             return datatype
@@ -250,8 +258,8 @@ class Checker(Visitor):
         
         datatype=check_binary_op(n.op, izq, der)
         if datatype == None:
-            print(f'No se puede operar {izq} con {der}')
-            self.error=True
+            self.context.error(f'No se puede operar {izq} con {der}',n)
+            self.context.have_errors=True
         else:
             n.datatype=datatype
             return datatype
@@ -262,8 +270,8 @@ class Checker(Visitor):
         # Comparar datatype
         datatype=check_unary_op(n.op, data_type_expr)
         if datatype == None:
-            print(f'No se puede operar {data_type_expr}')
-            self.error=True
+            self.context.error(f'No se puede operar {data_type_expr}',n)
+            self.context.have_errors=True
         else:
             n.datatype=datatype
             return datatype
@@ -271,8 +279,8 @@ class Checker(Visitor):
     def visit(self, n: Argument, env: Symtab):
         # Agregar el nombre del parametro a Symtab
         if env.add(n.name, n):
-            print(f'El parametro {n.name} ya esta declarado')
-            self.error=True
+            self.context.error(f'El parametro {n.name} ya esta declarado',n)
+            self.context.have_errors=True
         else:
             return n.datatype
 
@@ -284,11 +292,11 @@ class Checker(Visitor):
         # Buscar la Variable en Symtab
         nodo=env.get(n.expr.name)
         if nodo == None:
-            print(f'No se encuentra {n.expr.name}')
-            self.error=True
+            self.context.error(f'No se encuentra {n.expr.name}',n)
+            self.context.have_errors=True
         elif  nodo.datatype==None:
-            print(f'Tipo de retorno desconocido de {n.expr.name} ')
-            self.error=True
+            self.context.error(f'Tipo de retorno desconocido de {n.expr.name} ',n)
+            self.context.have_errors=True
         else:
             return nodo.datatype
     def visit(self, n: Read, env: Symtab):
@@ -296,8 +304,8 @@ class Checker(Visitor):
         # Buscar la Variable en Symtab
         nodo=env.get(n.local.name)
         if nodo == None:
-            print(f'No se encuentra {n.local.name}')
-            self.error=True
+            self.context.error(f'No se encuentra {n.local.name}',n)
+            self.context.have_errors=True
         else:
             return nodo.datatype.name
 
@@ -306,8 +314,8 @@ class Checker(Visitor):
         # Visitar la condicion del While (Comprobar tipo bool)
         condition_type = n.relation.accept(self, env)
         if condition_type != 'bool':
-            print(f'Tipo incorrecto para la condición del While. Se esperaba "bool", pero se encontró "{condition_type}".')
-            self.error=True
+            self.context.error(f'Tipo incorrecto para la condición del While. Se esperaba "bool", pero se encontró "{condition_type}".',n)
+            self.context.have_errors=True
         # Visitar las Stmts
         n.statement.accept(self, env)
         self.whileBool=False
@@ -315,15 +323,15 @@ class Checker(Visitor):
     def visit(self, n: Break, env: Symtab):
         # Esta dentro de un While?
         if self.whileBool == False:
-            print('La instrucción "Break" debe estar dentro de un bucle "While".')
-            self.error=True
+            self.context.error('La instrucción "Break" debe estar dentro de un bucle "While".',n)
+            self.context.have_errors=True
 
     def visit(self, n: If, env: Symtab):
         # Visitar la condicion del IfStmt (Comprobar tipo bool)
         condition_type = n.relation.accept(self, env)
         if condition_type != 'bool':
-            print(f'Tipo incorrecto para la condición del If. Se esperaba "bool", pero se encontró "{condition_type}".')
-            self.error=True
+            self.context.error(f'Tipo incorrecto para la condición del If. Se esperaba bool, pero se encontró {condition_type}',n)
+            self.context.have_errors=True
         # Visitar las Stmts del then
         n.statement.accept(self, env)
 
@@ -333,10 +341,11 @@ class Checker(Visitor):
         
 
     def visit(self, n: Return, env: Symtab):
-        # Visitar la expresion asociada
+        
         padre=list(env.parent.entries.keys())
         nombre_funcion=padre[len(padre)-1] #Nombre de la funcion
         nodo_funcion=env.get(nombre_funcion)
+        # Visitar la expresion asociada
         expr_type = n.expr.accept(self, env)
         # Actualizar el datatype de la funcion
         nodo_funcion.datatype=expr_type
@@ -360,29 +369,24 @@ class Checker(Visitor):
         #print(nodo)
         #print("------------------")
         if nodo == None:
-            print(f'No se encuentra {n.location.name}')
-            self.error=True
+            self.context.error(f'No se encuentra {n.location.name}',n)
+            self.context.have_errors=True
         else:
             # Visitar la expresion asociada
             expr_type = n.expr.accept(self, env)
             # Actualizar el datatype de la variable
             dataType= check_binary_op('+', nodo.datatype.name, expr_type)
             if dataType == None:
-                print(f'No se puede asignar {expr_type} a {nodo.datatype.name}')
-                self.error=True
+                self.context.error(f'No se puede asignar {expr_type} a {nodo.datatype.name}',n)
+                self.context.have_errors=True
             elif isinstance(nodo.datatype, ArrayType):
                 if isinstance(n.location, SimpleLocation):
-                    print(f'{n.location.name} es de tipo array, no se le puede asignar un valor a un array  ')
-                    self.error=True
+                    self.context.error(f'{n.location.name} es de tipo array, no se le puede asignar un valor a un array  ',n)
+                    self.context.have_errors=True
                 elif isinstance(n.location, ArrayLocation):
                     if isinstance(n.location.expr, Unary):
                         if n.location.expr.op== '-':
-                            print(f'El indice del array {n.location.name} no puede ser negativo  ')
-                            self.error=True
-                     
-                
+                            self.context.error(f'El indice del array {n.location.name} no puede ser negativo  ',n)
+                            self.context.have_errors=True
             else:
                 return dataType
-    
-
-

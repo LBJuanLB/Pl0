@@ -133,15 +133,14 @@ class Lexer(sly.Lexer):
             print(f"Line {self.lineno}. Caracter ilegal '{t.value[0]}'")
             self.index += 1
 
-def main(argv):
-    if len(argv) != 2:
-        print(f"Usage: python {argv[0]} filename")
-        exit(1)
-    
+    def __init__(self, context = None):
+        self.context = context
+
+
+def print_lexer(argv):
     lex = Lexer()
-    txt = open(argv[1]).read()
     ##
-    for tok in lex.tokenize(txt):
+    for tok in lex.tokenize(argv):
         #value=tok.value if isinstance(tok.value , str(tok.value))
         if isinstance(tok.value, str):
             value = tok.value
@@ -156,7 +155,8 @@ def main(argv):
     console.print(table)
         #print(tok)
 
-
+'''
 if __name__ == '__main__':
     from sys import argv
     main(argv)
+'''

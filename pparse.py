@@ -7,10 +7,8 @@ from dataclasses import asdict
 import logging
 import sly
 from arbol import *
-import arbol
 from plex import Lexer
 from AST import *
-from checker import *
 
 class Parser(sly.Parser):
     log = logging.getLogger()
@@ -347,41 +345,25 @@ class Parser(sly.Parser):
         print(f"Error de sintaxis: Error al llamar la variable. Linea {p.lineno}")
 
 
-def main(argv):
+def gen_ast(argv):
+    '''
     if len(argv) != 2:
         print(f"Usage: python {argv[0]} filename")
         exit(1)
-    
+    '''
     lex = Lexer()
     pas = Parser()
-    check=Checker()
     
-    txt = open(argv[1]).read()
-    ast = pas.parse(lex.tokenize(txt))
-    error=check.checker(ast)
+    #txt = open(argv[1]).read()
+    ast = pas.parse(lex.tokenize(argv))
+    return ast , Dot.render(ast)
     '''
-    for tok in lex.tokenize(txt):
-        #value=tok.value if isinstance(tok.value , str(tok.value))
-        if isinstance(tok.value, str):
-            value = tok.value
-        else:
-            value = tok.value
-        table.add_row(tok.type,
-                      str(value),
-                      str(tok.lineno),
-                      str(tok.index),
-                      str(tok.end))
-    console = Console()
-    console.print(table)
+    #Imprimir AST en consola
+    print_ast(ast)
+    #Imprimir AST en Graphviz
+    with open('graph.dot','w') as archivo:
+        archivo.write(str(Dot.render(ast)))
     '''
-    if error:
-        ...
-    else:
-        #Imprimir AST en consola
-        print_ast(ast)
-        #Imprimir AST en Graphviz
-        with open('graph.dot','w') as archivo:
-            archivo.write(str(Dot.render(ast)))
     
 def print_ast(node, indent=0):
 
@@ -398,7 +380,7 @@ def print_ast(node, indent=0):
 
   for name, value in vars(node).items():
 
-    if isinstance(value, arbol.node):
+    if isinstance(value, node):
       print_ast(value, indent + 2)
 
     elif isinstance(value, list):
@@ -409,6 +391,8 @@ def print_ast(node, indent=0):
       print("  " * (indent + 2), end="")
       print("|-- " + name, end="") 
       print(" (" + str(value) + ")")
+'''
 if __name__ == '__main__':
     from sys import argv
     main(argv)
+'''
