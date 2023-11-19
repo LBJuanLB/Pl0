@@ -26,6 +26,7 @@ from plex       import print_lexer
 from pparse     import gen_ast
 from context    import Context
 from checker   import Checker
+from instrucciones import AST
 
 import argparse
 
@@ -76,6 +77,11 @@ def parse_args():
     '--sym',
     action='store_true',
     help='Dump the symbol table')
+  
+  mutex.add_argument(
+    '-I', '--ir',
+    action='store_true',
+    help='Dump the generated Intermediate representation')
 
   return cli.parse_args()
 
@@ -140,6 +146,20 @@ if __name__ == '__main__':
           checker.symtab.print_symbol_table()
     else:
       print("Hay errores en el programa, no se puede generar la tabla de simbolos")
+    
+  elif args.ir:
+    context.parse(source)
+    checker = Checker(context)
+    tabla=checker.checker(context.ast,context)
+    if context.have_errors == False:
+      ircode = AST()
+      flex = fname.split('.')[0] + '.ir'
+      print(f'print intermediate representation: {flex}')
+      with open(flex, 'w', encoding='utf-8') as f:
+        with redirect_stdout(f):
+          print(ircode.instrucciones(context.ast))
+    else:
+      print("Hay errores en el programa, no se puede generar el codigo intermedio")
 
   else:
 

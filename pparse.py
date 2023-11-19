@@ -8,7 +8,7 @@ import logging
 import sly
 from arbol import *
 from plex import Lexer
-from AST import *
+from dot import *
 
 class Parser(sly.Parser):
     log = logging.getLogger()
