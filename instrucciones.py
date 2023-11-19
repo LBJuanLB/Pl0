@@ -6,6 +6,8 @@ class AST(Visitor):
         self.registros=0
         self.whiles=0
         self.ifs=0
+        self.arguments=[]
+        self.variables=[]
 
     @classmethod
     def instrucciones(cls, n:node):
@@ -23,9 +25,11 @@ class AST(Visitor):
         inst.append(('LABEL', n.name))
         if n.arguments != None:
             for arg in n.arguments:
+                self.arguments.append([arg.name, arg.datatype.name])
                 arg.accept(self, inst)
         if n.locals != None:
             for local in n.locals:
+                self.variables.append([local.name, local.datatype.name])
                 local.accept(self, inst)
         if n.statements != None:
             for stmt in n.statements:
@@ -35,6 +39,7 @@ class AST(Visitor):
         return n.name
 
     def visit(self, n:Integer, inst:list):
+
         #Cargamos el valor del entero en el registro
         self.registros+=1
         inst.append(('MOVI', n.value, f'R{self.registros}'))
@@ -48,7 +53,6 @@ class AST(Visitor):
     
     def visit(self, n:Relation, inst:list):
         #Se cargan los valores de las expresiones en los registros
-        print(n.left)
         left,tipoL = n.left.accept(self, inst)
         right,tipoR = n.right.accept(self, inst)
         #Se crea la instruccion de comparacion
@@ -62,7 +66,7 @@ class AST(Visitor):
     
     def visit(self, n:Assing, inst:list):
         #Se cargan los valores de la expresion en el registro
-        expr, tipoExpr = n.expr.accept(self)
+        expr, tipoExpr = n.expr.accept(self, inst)
         if tipoExpr == 'int':
             #Se crea la instruccion de asignacion
             inst.append(('STOREI', expr, n.location))
@@ -76,7 +80,7 @@ class AST(Visitor):
     
     def visit(self, n:Write, inst:list):
         #Se cargan los valores de la expresion en el registro
-        expr, tipoExpr = n.expr.accept(self)
+        expr, tipoExpr = n.expr.accept(self,inst)
         if tipoExpr == 'int':
             #Se crea la instruccion de print
             inst.append(('PRINTI', expr))
@@ -92,7 +96,7 @@ class AST(Visitor):
         #Se crea el label del while
         inst.append(('LABEL', f'WHILE_{self.whiles}'))
         #Se cargan los valores de la expresion en el registro
-        expr, tipoExpr = n.relation.accept(self)
+        expr, tipoExpr = n.relation.accept(self,inst)
         #Se crea la instruccion de comparacion
         inst.append(('CBRANCH', expr, f'TRUE_WHILE_{self.whiles}',f'END_WHILE_{self.whiles}',))
         #Se crea el label de verdadero del while
@@ -135,7 +139,7 @@ class AST(Visitor):
             inst.append(('LABEL', f'END_IF_{self.ifs}'))
 
     def visit(self, n:Return, inst:list):
-        expr, tipoExpr = n.expr.accept(self)
+        expr, tipoExpr = n.expr.accept(self, inst)
         if tipoExpr == 'int':
             #Se crea la instruccion de return
             inst.append(('RETI', expr))
@@ -160,15 +164,20 @@ class AST(Visitor):
         return n.name, n.expr.value
     
     def visit(self, n:SimpleLocation,inst:list):
-        return n.name
+        for arg in self.arguments:
+            if arg[0] == n.name:
+                return n.name,arg[1]
+        for var in self.variables:
+            if var[0] == n.name:
+                return n.name,var[1]
     
     def visit(self, n:ArrayLocation,inst:list):
         return n.name, n.expr.value
 
     def visit(self, n:Binary, inst:list):
         #Se cargan los valores de las expresiones en los registros
-        left, tipoL = n.left.accept(self)
-        right, tipoR = n.right.accept(self)
+        left, tipoL = n.left.accept(self,inst)
+        right, tipoR = n.right.accept(self,inst)
         #Se crea la instruccion de operacion
         self.registros+=1
         if tipoL == 'int':
@@ -194,7 +203,7 @@ class AST(Visitor):
     
     def visit(self, n:Unary, inst:list):
         #Se cargan los valores de la expresion en el registro
-        expr, tipoExpr = n.expr.accept(self)
+        expr, tipoExpr = n.expr.accept(self,inst)
         #Se crea la instruccion de operacion
         self.registros+=1
         if tipoExpr == 'int':
@@ -227,7 +236,7 @@ class AST(Visitor):
             inst.append(('VARF', n.name))
     
     def visit(self, n:TypeCast, inst:list):    
-        expr, tipoExpr = n.expr.accept(self)
+        expr, tipoExpr = n.expr.accept(self,inst)
         if n.datatype.name == 'int':
             #Se crea la instruccion de casteo
             self.registros+=1
@@ -243,8 +252,9 @@ class AST(Visitor):
         funcion=('CALL',n.name)
         for expr in n.exprlist:
             registro = expr.accept(self, inst)
-            funcion+=(registro)
+            funcion=(funcion,registro)
         #Se crea la instruccion de llamada
         self.registros+=1
-        inst.append(funcion+(f'R{self.registros}'))
+        funcion=(funcion,f'R{self.registros}')
+        inst.append(funcion)
         return f'R{self.registros}'
