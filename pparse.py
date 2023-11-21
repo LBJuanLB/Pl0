@@ -17,7 +17,14 @@ class Parser(sly.Parser):
     debugfile = 'pl0.txt'
     tokens = Lexer.tokens
     # Implementacion Reglas de la Gramatica
-
+    precedence =  (
+        ('left', 'OR'),
+        ('left', 'AND'),
+        ('left', 'II', 'DI','MAI', 'MEI', '>', '<'),
+        ('left', 'ADD', 'SUB'),
+        ('left', 'MUL', 'DIV'),
+        ('right', 'NOT'),    
+    )
     @_("funclist")
     def program(self, p):
         return Program(p.funclist)
