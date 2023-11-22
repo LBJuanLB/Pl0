@@ -1,0 +1,3 @@
+ArrayLocation(name='a', 
+expr=SimpleLocation(name='i', datatype=SimpleType(name='int')), 
+datatype=ArrayType(name='int', expr=Integer(value=1024, datatype=SimpleType(name='int'))))

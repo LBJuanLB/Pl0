@@ -61,6 +61,7 @@ class Function(Declaration):
 class Assing(Statement):
     location: Location
     expr: Expression
+    datatype:DataType
 
 @dataclass    
 class Print(Statement):
@@ -69,10 +70,12 @@ class Print(Statement):
 @dataclass    
 class Write(Statement):
     expr: Expression
+    datatype: DataType
 
 @dataclass    
 class Read(Statement):
     local:Location
+    datatype: DataType
 
 @dataclass
 class While(Statement): 
@@ -105,20 +108,24 @@ class Begin(Statement):
 @dataclass
 class SimpleType(DataType):
     name: Name
+  
 
 @dataclass
 class ArrayType(DataType):
     name: Name
     expr: Expression
+  
 
 @dataclass    
 class SimpleLocation(Location):
     name: Name
+    datatype: DataType
 
 @dataclass
 class ArrayLocation(Location):
     name: Name
     expr: Expression
+    datatype: DataType
 
 @dataclass
 class String(Expression):
@@ -151,6 +158,7 @@ class TypeCast(Expression):
 class FunCall(Expression):
     name: Name
     exprlist: list
+    datatype: DataType
 
 @dataclass
 class Integer(Literal):

@@ -80,3 +80,4 @@ Clase 11/11/23:
 Se finalizó la implementación inicial de la funcionalidad semántica, completando los métodos faltantes en la clase Checker para recorrer y analizar los distintos nodos del AST. 
 Además, se realizaron pruebas utilizando los ejercicios provistos en la carpeta de test3, validando que las reglas semánticas se aplican correctamente y se lanzen errores cuando corresponde.
 Se identificaron y corrigieron algunos errores durante las pruebas. Queda pendiente aumentar la cobertura de pruebas e identificar posibles casos borde que aún no estén contemplados apropiadamente.
+

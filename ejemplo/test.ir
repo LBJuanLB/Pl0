@@ -1,0 +1,13 @@
+[
+('LABEL', 'main'),
+('VARI', 'x'),
+('VARI', 'y'),
+('MOVI', 4, 'R1'),
+('STOREI', 'R1', 'x'),
+('LOADI', 'x', 'R2'),
+('MOVI', 10, 'R3'),
+('ADDI', 'R2', 'R3', 'R4'),
+('STOREI', 'R4', 'y'),
+('LOADI', 'y', 'R5'),
+('PRINTI', 'R5'),
+]

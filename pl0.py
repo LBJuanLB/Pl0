@@ -16,6 +16,7 @@ optional arguments:
   -p, --png          Generate AST graph as png format
   -c, --check        Check the program for errors
   -I, --ir           Dump the generated Intermediate representation
+  -RunI, --runir     Run the generated Intermediate representation
   --sym              Dump the symbol table
   -S, --asm          Store the generated assembly file
   -R, --exec         Execute the generated program
@@ -27,6 +28,7 @@ from pparse     import gen_ast
 from context    import Context
 from checker   import Checker
 from instrucciones import AST
+from interp    import Interpreter
 
 import argparse
 
@@ -82,6 +84,11 @@ def parse_args():
     '-I', '--ir',
     action='store_true',
     help='Dump the generated Intermediate representation')
+  
+  mutex.add_argument(
+    '-RunI', '--runir',
+    action='store_true',
+    help='Run the generated Intermediate representation')
 
   return cli.parse_args()
 
@@ -157,7 +164,23 @@ if __name__ == '__main__':
       print(f'print intermediate representation: {flex}')
       with open(flex, 'w', encoding='utf-8') as f:
         with redirect_stdout(f):
-          print(ircode.instrucciones(context.ast))
+          inst=ircode.instrucciones(context.ast)
+          print("[")
+          for i in inst:
+            print(str(i)+",")
+          print("]")
+    else:
+      print("Hay errores en el programa, no se puede generar el codigo intermedio")
+      
+  elif args.runir:
+    context.parse(source)
+    checker = Checker(context)
+    tabla=checker.checker(context.ast,context)
+    if context.have_errors == False:
+      ircode = AST()
+      inst=ircode.instrucciones(context.ast)
+      interpreter = Interpreter()
+      interpreter.execute(inst)
     else:
       print("Hay errores en el programa, no se puede generar el codigo intermedio")
 

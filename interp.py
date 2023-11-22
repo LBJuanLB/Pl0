@@ -91,26 +91,6 @@ class Interpreter(object):
     self.vars[name] = self.registers[target]
   run_STOREF = run_STOREI
   run_STOREB = run_STOREI
-
-# -------------------------------------------
-#     NO MODIFICAR NADA A CONTINUACIÓN
-# -------------------------------------------
-
-def main():
-  import sys
-  from ircode import compile_ircode
-  from errors import errors_reported
-
-  if len(sys.argv) != 2:
-    sys.stderr.write('Usage: python3 -m pl0.interp filename\n')
-    raise SystemExit(1)
-
-  source = open(sys.argv[1]).read()
-  code = compile_ircode(source)
-  if not errors_reported():
-    interpreter = Interpreter()
-    interpreter.execute(code)
-
-if __name__ == '__main__':
-  main()
-
+  
+  def run_LABEL(self, name):
+    pass

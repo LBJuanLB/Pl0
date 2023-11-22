@@ -90,15 +90,18 @@ class Checker(Visitor):
                 self.context.have_errors=True
                 errors=True
             if errors==False:
+                n.datatype=node.datatype
                 return node.datatype.name
         elif isinstance(n, SimpleLocation) :
             if isinstance(node.datatype, ArrayType)and self.funcall==False:
                 self.context.error(f' {n.name} es un array, no una variable',n)   
                 self.context.have_errors=True
             else:
+                n.datatype=node.datatype
                 return node.datatype.name
         else: 
             # Devuelvo el datatype
+            n.datatype=node.datatype
             return node.datatype.name
 
     def visit(self, n: TypeCast, env: Symtab):
@@ -174,6 +177,7 @@ class Checker(Visitor):
                         j+=1
                     self.funcall=False
                     # Retornar el datatype de la funcion
+                    n.datatype=datatype
                     return datatype
 
     def visit(self, n: Binary, env: Symtab):
@@ -183,6 +187,10 @@ class Checker(Visitor):
         # Visitar el hijo derecho (devuelve datatype)
         der = n.right.accept(self, env)
         # Comparar ambos tipo de datatype
+        if isinstance(der,SimpleType):
+            der=der.name
+        if isinstance(izq,SimpleType):
+            izq=izq.name
         datatype=check_binary_op(n.op, izq, der)
         if datatype == None:
             self.context.error(f'No se puede operar {izq} con {der}',n)
@@ -197,7 +205,10 @@ class Checker(Visitor):
         # Visitar el hijo derecho (devuelve datatype)
         der=n.right.accept(self, env)
         # Comparar ambos tipo de datatype
-        
+        if isinstance(der,SimpleType):
+            der=der.name
+        if isinstance(izq,SimpleType):
+            izq=izq.name
         datatype=check_binary_op(n.op, izq, der)
         if datatype == None:
             self.context.error(f'No se puede operar {izq} con {der}',n)
@@ -210,6 +221,8 @@ class Checker(Visitor):
         # Visitar la expression asociada (devuelve datatype)
         data_type_expr=n.expr.accept(self, env)
         # Comparar datatype
+        if isinstance(data_type_expr,SimpleType):
+            data_type_expr=data_type_expr.name
         datatype=check_unary_op(n.op, data_type_expr)
         if datatype == None:
             self.context.error(f'No se puede operar {data_type_expr}',n)
@@ -240,6 +253,7 @@ class Checker(Visitor):
             self.context.error(f'Tipo de retorno desconocido de {n.expr.name} ',n)
             self.context.have_errors=True
         else:
+            n.datatype=nodo.datatype
             return nodo.datatype
     def visit(self, n: Read, env: Symtab):
         n.local.accept(self, env)
@@ -249,6 +263,7 @@ class Checker(Visitor):
             self.context.error(f'No se encuentra {n.local.name}',n)
             self.context.have_errors=True
         else:
+            n.datatype=nodo.datatype
             return nodo.datatype.name
 
     def visit(self, n: While, env: Symtab):
@@ -290,8 +305,8 @@ class Checker(Visitor):
         # Visitar la expresion asociada
         expr_type = n.expr.accept(self, env)
         # Actualizar el datatype de la funcion
-        nodo_funcion.datatype=expr_type
-        n.datatype = expr_type
+        nodo_funcion.datatype=SimpleType(expr_type)
+        n.datatype = SimpleType(expr_type)
         return expr_type
             
 
@@ -306,7 +321,7 @@ class Checker(Visitor):
     def visit(self, n: Assing, env:Symtab):
         # Buscar la Variable en Symtab
         nodo=env.get(n.location.name)
-        
+        n.location.accept(self, env)
         #print (n.expr)
         #print(nodo)
         #print("------------------")
@@ -317,6 +332,8 @@ class Checker(Visitor):
             # Visitar la expresion asociada
             expr_type = n.expr.accept(self, env)
             # Actualizar el datatype de la variable
+            if isinstance(expr_type,SimpleType):
+                expr_type=expr_type.name
             dataType= check_binary_op('+', nodo.datatype.name, expr_type)
             if dataType == None:
                 self.context.error(f'No se puede asignar {expr_type} a {nodo.datatype.name}',n)
@@ -331,4 +348,5 @@ class Checker(Visitor):
                             self.context.error(f'El indice del array {n.location.name} no puede ser negativo  ',n)
                             self.context.have_errors=True
             else:
+                n.datatype=SimpleType(dataType)
                 return dataType

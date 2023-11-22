@@ -6,9 +6,6 @@ class AST(Visitor):
         self.registros=0
         self.whiles=0
         self.ifs=0
-        self.arguments=[]
-        self.variables=[]
-
     @classmethod
     def instrucciones(cls, n:node):
         lista = []
@@ -25,11 +22,9 @@ class AST(Visitor):
         inst.append(('LABEL', n.name))
         if n.arguments != None:
             for arg in n.arguments:
-                self.arguments.append([arg.name, arg.datatype.name])
                 arg.accept(self, inst)
         if n.locals != None:
             for local in n.locals:
-                self.variables.append([local.name, local.datatype.name])
                 local.accept(self, inst)
         if n.statements != None:
             for stmt in n.statements:
@@ -69,11 +64,11 @@ class AST(Visitor):
         expr, tipoExpr = n.expr.accept(self, inst)
         if tipoExpr == 'int':
             #Se crea la instruccion de asignacion
-            inst.append(('STOREI', expr, n.location))
+            inst.append(('STOREI', expr, n.location.name))
 
         elif tipoExpr == 'float':
             #Se crea la instruccion de asignacion
-            inst.append(('STOREF', expr, n.location))
+            inst.append(('STOREF', expr, n.location.name))
         
     def visit(self, n:Print, inst:list):
         ...
@@ -164,15 +159,22 @@ class AST(Visitor):
         return n.name, n.expr.value
     
     def visit(self, n:SimpleLocation,inst:list):
-        for arg in self.arguments:
-            if arg[0] == n.name:
-                return n.name,arg[1]
-        for var in self.variables:
-            if var[0] == n.name:
-                return n.name,var[1]
+        if n.datatype.name == 'int':
+            self.registros+=1
+            inst.append(('LOADI', n.name, f'R{self.registros}'))
+            registro = f'R{self.registros}'
+            return registro, n.datatype.name
+        elif n.datatype.name == 'float':
+            self.registros+=1
+            inst.append(('LOADF', n.name, f'R{self.registros}'))
+            registro = f'R{self.registros}'
+            self.registros+=1
+            return registro, n.datatype.name
     
     def visit(self, n:ArrayLocation,inst:list):
-        return n.name, n.expr.value
+        Rexpr, TipoExpr = n.expr.accept(self,inst)
+        inst.append(('LOADI'))  
+        return n.name, n.expr.value, n.datatype.name
 
     def visit(self, n:Binary, inst:list):
         #Se cargan los valores de las expresiones en los registros
@@ -249,12 +251,12 @@ class AST(Visitor):
             return f'R{self.registros}', 'int'
     
     def visit(self, n:FunCall, inst:list):
-        funcion=('CALL',n.name)
+        funcion=['CALL',n.name]
         for expr in n.exprlist:
-            registro = expr.accept(self, inst)
-            funcion=(funcion,registro)
+            registro, tipo = expr.accept(self, inst)
+            funcion.append(registro)
         #Se crea la instruccion de llamada
         self.registros+=1
-        funcion=(funcion,f'R{self.registros}')
-        inst.append(funcion)
-        return f'R{self.registros}'
+        funcion.append(f'R{self.registros}')
+        inst.append(tuple(funcion))
+        return f'R{self.registros}', n.datatype.name

@@ -17,14 +17,7 @@ class Parser(sly.Parser):
     debugfile = 'pl0.txt'
     tokens = Lexer.tokens
     # Implementacion Reglas de la Gramatica
-    precedence =  (
-        ('left', 'OR'),
-        ('left', 'AND'),
-        ('left', 'II', 'DI','MAI', 'MEI', '>', '<'),
-        ('left', 'ADD', 'SUB'),
-        ('left', 'MUL', 'DIV'),
-        ('right', 'NOT'),    
-    )
+
     @_("funclist")
     def program(self, p):
         return Program(p.funclist)
@@ -64,7 +57,7 @@ class Parser(sly.Parser):
 
     @_("location ASIG expr")
     def statement(self, p):
-        return Assing(p.location, p.expr)
+        return Assing(p.location, p.expr,None)
     
     @_("PRINT '(' LITERAL ')'")
     def statement(self, p):
@@ -72,11 +65,11 @@ class Parser(sly.Parser):
     
     @_("WRITE '(' expr ')'")
     def statement(self, p):
-        return Write(p.expr)
+        return Write(p.expr, None)
     
     @_("READ '(' location ')'")
     def statement(self, p):
-        return Read(p.location)
+        return Read(p.location, None)
     
     @_("RETURN expr")
     def statement(self, p):
@@ -84,7 +77,7 @@ class Parser(sly.Parser):
         
     @_("NAME '(' exprlist ')'")
     def statement(self, p):
-        return FunCall(p[0], p[2])
+        return FunCall(p[0], p[2],None )
 
     @_("SKIP")
     def statement(self, p):
@@ -116,15 +109,15 @@ class Parser(sly.Parser):
 
     @_("NAME '[' expr ']'")
     def expr(self, p):
-        return ArrayLocation(p[0], p[2])
+        return ArrayLocation(p[0], p[2],None)
 
     @_("NAME '(' exprlist ')'")
     def expr(self, p):
-        return FunCall(p[0], p[2])
+        return FunCall(p[0], p[2],None)
 
     @_("NAME")
     def expr(self, p):
-        return SimpleLocation(p[0])
+        return SimpleLocation(p[0],None)
 
     @_("INT")
     def expr(self, p):
@@ -197,11 +190,11 @@ class Parser(sly.Parser):
     
     @_("NAME")
     def location(self, p):
-        return SimpleLocation(p[0])
+        return SimpleLocation(p[0],None)
         
     @_("NAME '[' expr ']'")
     def location(self, p):
-        return ArrayLocation(p[0], p[2])
+        return ArrayLocation(p[0], p[2],None)
 
     #ERRORES
     @_("error")
