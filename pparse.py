@@ -9,6 +9,7 @@ import sly
 from arbol import *
 from plex import Lexer
 from dot import *
+import arbol
 
 class Parser(sly.Parser):
     log = logging.getLogger()
@@ -62,7 +63,19 @@ class Parser(sly.Parser):
     @_("WHILE relation DO statement")
     def statement(self, p):
         return While(p.relation, p.statement)
-
+    
+    @_("FOR NAME ASIG expr TO expr DO statement")
+    def statement(self, p):
+        A=Assing(SimpleLocation(p.NAME,None), p.expr0,None)
+        B=While(Relation("<=",SimpleLocation(p.NAME,None), p.expr1,None), Begin([p.statement,Assing(SimpleLocation(p.NAME,None), Binary("+", SimpleLocation(p.NAME,None), Integer(1,SimpleType("int")),None),None)]))
+        return Begin([A,B])
+    
+    @_("FOR NAME ASIG expr DOWNTO expr DO statement")    
+    def statement(self,p):
+        A=Assing(SimpleLocation(p.NAME,None), p.expr0,None)
+        B=While(Relation(">=", SimpleLocation(p.NAME,None), p.expr1,None), Begin([p.statement,Assing(SimpleLocation(p.NAME,None), Binary("-", SimpleLocation(p.NAME,None), Integer(1,SimpleType("int")),None),None)]))
+        return Begin([A,B])
+        
     @_("IF relation THEN statement ELSE statement %prec ELSE")
     def statement(self, p):
         return If(p.relation, p.statement0, p.statement1)
@@ -258,7 +271,7 @@ def print_ast(node, indent=0):
 
   for name, value in vars(node).items():
 
-    if isinstance(value, node):
+    if isinstance(value, arbol.node):
       print_ast(value, indent + 2)
 
     elif isinstance(value, list):

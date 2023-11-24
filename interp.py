@@ -67,11 +67,17 @@ class Interpreter(object):
     self.registers[target] = self.registers[left] / self.registers[right]
 
   def run_PRINTI(self, value):
+    print(value)
     print(self.registers[value])
   run_PRINTF = run_PRINTI
 
   def run_PRINTB(self, value):
-    print(chr(self.registers[value]),end='')
+    i=0
+    string=""
+    while i < len(self.registers[value]):
+      string += chr(self.registers[value][i])
+      i += 1
+    print(string)
     sys.stdout.flush()
 
   def run_VARI(self, name):

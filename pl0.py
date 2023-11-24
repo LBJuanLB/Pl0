@@ -14,6 +14,7 @@ optional arguments:
   -l, --lex          Store output of lexer
   -d, --dot          Generate AST graph as DOT format
   -p, --png          Generate AST graph as png format
+  -pAST, --printAST  Print the AST
   -c, --check        Check the program for errors
   -I, --ir           Dump the generated Intermediate representation
   -RunI, --runir     Run the generated Intermediate representation
@@ -24,7 +25,7 @@ optional arguments:
 from contextlib import redirect_stdout
 #from rich       import print
 from plex       import print_lexer
-from pparse     import gen_ast
+from pparse     import gen_ast, print_ast
 from context    import Context
 from checker   import Checker
 from instrucciones import AST
@@ -89,6 +90,11 @@ def parse_args():
     '-RunI', '--runir',
     action='store_true',
     help='Run the generated Intermediate representation')
+  
+  mutex.add_argument(
+    '-pAST', '--printAST',
+    action='store_true',
+    help='Print the AST')
 
   return cli.parse_args()
 
@@ -183,6 +189,15 @@ if __name__ == '__main__':
       interpreter.execute(inst)
     else:
       print("Hay errores en el programa, no se puede generar el codigo intermedio")
+      
+  elif args.printAST:
+    context.parse(source)
+    checker = Checker(context)
+    checker.checker(context.ast,context)
+    if context.have_errors == False:
+      print_ast(context.ast)
+    else:
+      print("Hay errores en el programa, no se puede generar el AST")
 
   else:
 

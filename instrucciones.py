@@ -71,7 +71,10 @@ class AST(Visitor):
             inst.append(('STOREF', expr, n.location.name))
         
     def visit(self, n:Print, inst:list):
-        ...
+        self.registros+=1
+        string=n.string.encode('utf-8')
+        inst.append(('MOVB', string, f'R{self.registros}'))
+        inst.append(('PRINTB', f'R{self.registros}'))
     
     def visit(self, n:Write, inst:list):
         #Se cargan los valores de la expresion en el registro
@@ -84,7 +87,13 @@ class AST(Visitor):
             inst.append(('PRINTF', expr))
 
     def visit(self, n:Read, inst:list):
-        ...
+        valor=input(f'Ingrese un valor para {n.local.name}: ')
+        if n.local.datatype.name == 'int':
+            #Se crea la instruccion de read
+            inst.append(('STOREI', n.local.name, int(valor)))
+        elif n.local.datatype.name == 'float':
+            #Se crea la instruccion de read
+            inst.append(('STOREF', n.local.name, float(valor)))
     
     def visit(self, n:While, inst:list):
         self.whiles+=1

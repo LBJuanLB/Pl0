@@ -1,0 +1,5 @@
+[
+('LABEL', 'main'),
+('MOVB', b'"Hola Mundo\\n"', 'R1'),
+('PRINTB', 'R1'),
+]

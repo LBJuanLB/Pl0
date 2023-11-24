@@ -22,7 +22,7 @@ class Lexer(sly.Lexer):
         #Palabras Reservadas
         FUN, BEGIN, END, WHILE, DO, IF, THEN, ELSE,
         PRINT, WRITE, READ, RETURN, SKIP, BREAK, INT_T,
-        FLOAT_T,
+        FLOAT_T,TO,DOWNTO, FOR,
         #Asignacion (:=)
         ASIG,
 
@@ -107,6 +107,9 @@ class Lexer(sly.Lexer):
     MAI    =r'>='
     II     =r'=='
     DI     =r'!='
+    TO = r'[Tt][Oo]\b'
+    DOWNTO = r'[Dd][Oo][Ww][Nn][Tt][Oo]\b'
+    FOR = r'[Ff][Oo][Rr]\b'
     WHILE = r'[Ww][Hh][Ii][Ll][Ee]\b'
     ASIG   =r':='
     NOT    =r'[Nn][oO][Tt]\b'

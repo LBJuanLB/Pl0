@@ -245,16 +245,21 @@ class Checker(Visitor):
     def visit(self, n: Write, env: Symtab):
         n.expr.accept(self, env)
         # Buscar la Variable en Symtab
-        nodo=env.get(n.expr.name)
-        if nodo == None:
-            self.context.error(f'No se encuentra {n.expr.name}',n)
-            self.context.have_errors=True
-        elif  nodo.datatype==None:
-            self.context.error(f'Tipo de retorno desconocido de {n.expr.name} ',n)
-            self.context.have_errors=True
-        else:
-            n.datatype=nodo.datatype
-            return nodo.datatype
+        if isinstance(n.expr, SimpleLocation) or isinstance(n.expr, ArrayLocation):
+            nodo=env.get(n.expr.name)
+            if nodo == None:
+                self.context.error(f'No se encuentra {n.expr.name}',n)
+                self.context.have_errors=True
+            elif  nodo.datatype==None:
+                self.context.error(f'Tipo de retorno desconocido de {n.expr.name} ',n)
+                self.context.have_errors=True
+            else:
+                n.datatype=nodo.datatype
+                return nodo.datatype.name
+        if isinstance(n.expr, Literal):
+            n.datatype=n.expr.datatype
+            return n.expr.datatype.name
+        
     def visit(self, n: Read, env: Symtab):
         n.local.accept(self, env)
         # Buscar la Variable en Symtab
