@@ -81,3 +81,13 @@ Se finalizó la implementación inicial de la funcionalidad semántica, completa
 Además, se realizaron pruebas utilizando los ejercicios provistos en la carpeta de test3, validando que las reglas semánticas se aplican correctamente y se lanzen errores cuando corresponde.
 Se identificaron y corrigieron algunos errores durante las pruebas. Queda pendiente aumentar la cobertura de pruebas e identificar posibles casos borde que aún no estén contemplados apropiadamente.
 
+18/11/23
+Se realizaron mejoras significativas al sistema al modificar tanto el lexer como el parser para que puedan ser invocados desde el archivo pl0.py. 
+Además, se creó un archivo de instrucciones donde se centró el trabajo en la parte intermedia del compilador.
+
+21/11/23
+Se realizaron modificaciones al parser, específicamente se añadió precedencia para abordar y eliminar los conflictos "shift-reduce" que se presentaban anteriormente.
+
+24/11/23
+Hemos actualizado nuestra gramática para detectar ciclos "for" y hemos realizado mejoras en la parte intermedia. 
+Hemos llevado a cabo pruebas exhaustivas para asegurarnos de que nuestro compilador funcione correctamente, utilizando diversos ejemplos como casos de prueba.
