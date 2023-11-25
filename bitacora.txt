@@ -30,64 +30,70 @@ La gramática también incluye varios componentes no terminales que se refieren 
 
     expr: Define expresiones matemáticas y lógicas que involucran números, variables, operadores y llamadas a funciones.
 -------------------------------------------------------------------
-CLASE 21/09/23
-Se comenzó a realizar el analizador lexico basandonos en el analizador lexico para el lenguaje BASIC Darmounth 64 - baslex .py
-Ya luego mirando la gramatica que ya habiamos realizado empezamos a identificar los tokens, y los especificamos.  
+Clase 21/09/23:
 
-CLASE 26/09/23
-Verificamos que no nos faltara nigun token
-Tomamos un ejemplo de un programa que estaba en el archivo de especificaciones, lo llamamos programa.txt 
-Con el programa comenzamos a verificar que se estuvieran tomando adecuadamente los tokens
-Nos dimos cuenta que no estaba tomando bien los tokens, ya que "done" que era un identificador lo estaba tomando primero
-como token DO y el "ne" como name, tendria que tomar "done" completo como name, para solucionar esto agregamso \b para establecer
-el limite del token, con esto solucionamos ese problema
+    Inicio del desarrollo del analizador léxico basándonos en el analizador léxico para el lenguaje BASIC Darmouth 64 - baslex.py.
+    Identificación y especificación de tokens mediante la revisión de la gramática previamente establecida.
 
-CLASE 28/09/23
-Se modifico el analizador lexico para agregarle que ignore comentarios comenterios,y comience a detectar errores
-de tipo comentario/string no terminado, tambien cuando escribe mal un numero. 
-Tambien se agrego el error de que el identificador no puede empezar con un numero y se modifico la expresion regular
-porque el identificador puede tener _
-Se modifico la forma en que se muestra los tokens, ahora lo hace mediante una tabla  
+Clase 26/09/23:
 
-CLASE 05/09/23
-Se agregaron errores que de string no terminado, se comenzó a mirar la estructura del parser.
-Se agrego que si se encontraban dos string en una misma linea "Hola" "Mundo", las concatenara "HolaMundo"
+    Verificación exhaustiva para garantizar la inclusión de todos los tokens necesarios.
+    Utilización del programa de ejemplo contenido en el archivo de especificaciones (programa.txt) para validar la correcta identificación de tokens.
+    Corrección de problemas donde ciertos identificadores, como "done", eran interpretados incorrectamente.
 
-CLASE 12/09/23
-Comparamos nuestra gramatica con la gramatica del profesor, y corregimos unos erorres
+Clase 28/09/23:
 
-CLASE 19/09/23
-Comenzamos a describir las reglas en el parser y a describir los nodos necesarios
+    Modificación del analizador léxico para ignorar comentarios y detección de errores, como comentarios o strings no terminados y errores de formato numérico.
+    Adición de la restricción de que los identificadores no pueden comenzar con un número.
+    Mejora en la presentación de tokens mediante una tabla.
 
-CLASE 26/09/23
-Se solucionaron y se hicieron cambios en el parser para que se pudiera ejecutar. 
-El parser se probó con todos los test2. No ejecutó los ejemplos de big----.pl0 porque arrojaba un error de que excedia la recursividad.
-Se agregó que pueda detectar errores
-Clase 2/11/23:
+Clase 05/10/23:
 
-Se implementó un método para imprimir el árbol AST, sin embargo, la estructura actual no cumple con los requisitos especificados en las instrucciones del proyecto. 
-Se debe trabajar para que la salida del árbol refleje los niveles adecuados de indentación para representar las relaciones padre-hijo entre nodos. Esto mejorará la legibilidad del árbol impreso.
+    Incorporación de errores para strings no terminados.
+    Inicio del análisis de la estructura del parser.
+    Implementación de la concatenación de strings en una misma línea (e.g., "Hola" "Mundo").
 
-Clase 9/11/23:
+Clase 12/10/23:
 
-Se realizaron avances en la funcionalidad semántica del compilador. 
-Se crearon las clases base para el chequeo semántico, incluyendo la clase Checker que hereda de Visitor para recorrer el AST, y la clase SymbolTable para llevar un registro de los símbolos y scopes. 
-También se agregaron métodos iniciales en la clase Checker para los nodos AST. Sin embargo, el código agregado aún no ha sido probado o depurado apropiadamente. 
-Se debe completar la implementación y comenzar con pruebas incrementales.
+    Comparación y corrección de errores en nuestra gramática en comparación con la del profesor.
+
+Clase 19/10/23:
+
+    Descripción de reglas en el parser y especificación de los nodos necesarios.
+
+Clase 26/10/23:
+
+    Solución de problemas y ajustes en el parser para su ejecución.
+    Pruebas exitosas con todos los test2. Dificultades con los ejemplos de big----.pl0 debido a un error de recursividad, aún por resolver.
+    Agregada detección de errores en el parser.
+
+Clase 02/11/23:
+
+    Implementación de un método para imprimir el árbol AST. La estructura actual necesita mejoras para cumplir con los requisitos de indentación.
+
+Clase 09/11/23:
+
+    Avances en la funcionalidad semántica del compilador.
+    Creación de clases base para el chequeo semántico (Checker y SymbolTable).
+    Implementación inicial de métodos en la clase Checker para el análisis de nodos AST.
 
 Clase 11/11/23:
 
-Se finalizó la implementación inicial de la funcionalidad semántica, completando los métodos faltantes en la clase Checker para recorrer y analizar los distintos nodos del AST. 
-Además, se realizaron pruebas utilizando los ejercicios provistos en la carpeta de test3, validando que las reglas semánticas se aplican correctamente y se lanzen errores cuando corresponde.
-Se identificaron y corrigieron algunos errores durante las pruebas. Queda pendiente aumentar la cobertura de pruebas e identificar posibles casos borde que aún no estén contemplados apropiadamente.
+    Finalización de la implementación de la funcionalidad semántica.
+    Pruebas y depuración de los métodos Checker con ejercicios de test3.
+    Identificación y corrección de errores durante las pruebas.
 
-18/11/23
-Se realizaron mejoras significativas al sistema al modificar tanto el lexer como el parser para que puedan ser invocados desde el archivo pl0.py. 
-Además, se creó un archivo de instrucciones donde se centró el trabajo en la parte intermedia del compilador.
+18/11/23:
 
-21/11/23
-Se realizaron modificaciones al parser, específicamente se añadió precedencia para abordar y eliminar los conflictos "shift-reduce" que se presentaban anteriormente.
+    Modificaciones al lexer y al parser para invocarlos desde el archivo pl0.py.
+    Creación de un archivo de instrucciones centrado en la parte intermedia del compilador.
 
-24/11/23
-Hemos actualizado nuestra gramática para detectar ciclos "for" y hemos realizado mejoras en la parte intermedia. 
-Hemos llevado a cabo pruebas exhaustivas para asegurarnos de que nuestro compilador funcione correctamente, utilizando diversos ejemplos como casos de prueba.
+21/11/23:
+
+    Adición de precedencia al parser para abordar y eliminar conflictos "shift-reduce".
+
+24/11/23:
+
+    Actualización de la gramática para detectar ciclos "for".
+    Mejoras en la parte intermedia del compilador.
+    Pruebas exhaustivas para garantizar el correcto funcionamiento del compilador con diversos ejemplos como casos de prueba.
