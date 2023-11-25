@@ -96,4 +96,5 @@ Clase 11/11/23:
 
     Actualización de la gramática para detectar ciclos "for".
     Mejoras en la parte intermedia del compilador.
+    Actualizacion del Checker para dectectar el READ Y PRINT
     Pruebas exhaustivas para garantizar el correcto funcionamiento del compilador con diversos ejemplos como casos de prueba.
