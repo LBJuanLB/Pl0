@@ -19,10 +19,21 @@ class AST(Visitor):
     
     def visit(self, n:Function, inst:list):
         #Se crea el label de la funcion
-        inst.append(('LABEL', n.name))
+        argList=[]
+        data=""
+        if n.datatype != None:
+            if n.datatype.name == 'int':
+                data='I'
+            elif n.datatype.name == 'float':
+                data='F'
+        else:
+            data=''
         if n.arguments != None:
             for arg in n.arguments:
-                arg.accept(self, inst)
+                arg.accept(self, argList)
+        inst.append("========================================")
+        inst.append(f':::::::::: {n.name}({argList}) -> {data} ::::::::::')
+        #inst.append(('LABEL', n.name))
         if n.locals != None:
             for local in n.locals:
                 local.accept(self, inst)

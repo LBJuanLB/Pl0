@@ -189,7 +189,7 @@ class Parser(sly.Parser):
     
     @_("NOT relation ")
     def  relation(self, p):
-        return Relation(p[0], p[1], None)
+        return Relation(p[0], p[1], None, None)
     
     @_("'(' relation ')'")
     def  relation(self, p):

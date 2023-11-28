@@ -171,10 +171,8 @@ if __name__ == '__main__':
       with open(flex, 'w', encoding='utf-8') as f:
         with redirect_stdout(f):
           inst=ircode.instrucciones(context.ast)
-          print("[")
           for i in inst:
             print(str(i)+",")
-          print("]")
     else:
       print("Hay errores en el programa, no se puede generar el codigo intermedio")
       
@@ -191,13 +189,9 @@ if __name__ == '__main__':
       print("Hay errores en el programa, no se puede generar el codigo intermedio")
       
   elif args.printAST:
+    from rich import print
     context.parse(source)
-    checker = Checker(context)
-    checker.checker(context.ast,context)
-    if context.have_errors == False:
-      print_ast(context.ast)
-    else:
-      print("Hay errores en el programa, no se puede generar el AST")
+    print(context.ast)
 
   else:
 
